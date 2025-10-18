@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { BookOpen } from 'lucide-react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 export default function Home() {
@@ -15,17 +15,29 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="inline-flex items-center justify-center w-32 h-32 bg-indigo-600 rounded-full mb-8 shadow-lg">
-          <BookOpen className="w-20 h-20 text-white" />
+        {/* === Logo Section === */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="bg-white p-4 rounded-full shadow-lg">
+            <Image
+              src="/cpc logo.png" 
+              alt="Cordova Public College Logo"
+              width={120}
+              height={120}
+              className="rounded-full object-contain"
+              priority
+            />
+          </div>
         </div>
 
+        {/* === Title & Tagline === */}
         <h1 className="text-5xl font-extrabold text-gray-800 mb-3">
           Cordova Public College
         </h1>
         <p className="text-lg text-gray-600 mb-10 tracking-wide">
-          Library Management System
+          Your Digital Gateway to Learning 
         </p>
 
+        {/* === Buttons === */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={() => router.push('/login')}
