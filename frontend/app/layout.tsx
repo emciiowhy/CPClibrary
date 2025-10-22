@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Cordova Public College - Library Management System",
   description: "Digital library management system for Cordova Public College",
+  icons: {
+    icon: '/cpc-logo.png',
+  }
 };
 
 export default function RootLayout({
