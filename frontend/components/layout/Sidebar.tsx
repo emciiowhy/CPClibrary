@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { BookOpen, Home, Book, Users, Plus, Clock, LogOut } from 'lucide-react';
+import { BookOpen, Home, Book, Users, Plus, Clock, LogOut, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Sidebar() {
+export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -12,7 +12,7 @@ export default function Sidebar() {
   const menuItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/books', icon: Book, label: 'Books' },
-    { path: '/members', icon: Users, label: 'Members' },
+    { path: '/members', icon: Users, label: 'Students' },
     { path: '/books/add', icon: Plus, label: 'Add Book' },
     { path: '/borrow', icon: Clock, label: 'Borrow Records' },
   ];
@@ -24,14 +24,20 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="w-64 bg-indigo-900 text-white min-h-screen p-6 relative">
+      <div className="hidden md:block w-64 bg-indigo-900 text-white min-h-screen p-6 relative">
         <div className="mb-8">
-          <div className="flex items-center space-x-3">
-            <BookOpen className="w-8 h-8" />
-            <div>
-              <h2 className="font-bold text-lg">CPC Library</h2>
-              <p className="text-xs text-indigo-300">Admin Panel</p>
-            </div>
+          <div className="flex justify-between items-center space-x-3">
+              <div className='flex items-center space-x-3'>
+                <BookOpen className="w-8 h-8" />
+                <div>
+                  <h2 className="font-bold text-lg">CPC Library</h2>
+                  <p className="text-xs text-indigo-300">Admin Panel</p>
+                </div>
+              </div>
+
+              <button onClick={props.onClickBtnOpenSideBar}>
+                <ChevronLeft className='w-7 h-7'/>
+              </button>
           </div>
         </div>
         
@@ -40,7 +46,7 @@ export default function Sidebar() {
             <button
               key={item.path}
               onClick={() => router.push(item.path)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`w-full text-md flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                 pathname === item.path ? 'bg-indigo-800' : 'hover:bg-indigo-800'
               }`}
             >
