@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Book, Users, Clock, ChevronRight } from 'lucide-react';
-import Sidebar from '@/components/layout/Sidebar';
-import Header from '@/components/layout/Header';
+import { useState, useEffect } from "react";
+import { Book, Users, Clock, ChevronRight } from "lucide-react";
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
 
 // ✅ Define type for your recent records
 
@@ -39,17 +39,17 @@ export default function DashboardPage() {
     setRecentRecords([
       {
         id: 1,
-        studentName: 'Juan Dela Cruz',
-        bookTitle: 'Introduction to Computer Science',
-        dateIssued: '2024-10-15',
-        dueDate: '2024-10-29',
+        studentName: "Juan Dela Cruz",
+        bookTitle: "Introduction to Computer Science",
+        dateIssued: "2024-10-15",
+        dueDate: "2024-10-29",
       },
       {
         id: 2,
-        studentName: 'Maria Santos',
-        bookTitle: 'Database Management Systems',
-        dateIssued: '2024-10-16',
-        dueDate: '2024-10-30',
+        studentName: "Maria Santos",
+        bookTitle: "Database Management Systems",
+        dateIssued: "2024-10-16",
+        dueDate: "2024-10-30",
       },
     ]);
   }, []);
@@ -57,25 +57,20 @@ export default function DashboardPage() {
   const [openSideBar, setOpenSideBar] = useState(true);
 
   return (
-    <div className="flex-col md:flex-row flex">
+    <div className="flex-col md:flex-row flex h-screen overflow-hidden">
       <Header />
-      {
-        openSideBar && (
-          <Sidebar    
-            onClickBtnOpenSideBar={() => setOpenSideBar(!openSideBar)}
-        />)
-      }
-      
-      <main className="flex-1 p-6 bg-gray-100 min-h-screen">
-        <div className='flex justify-center items-center flex-row w-fit gap-3 mb-6'>
-          {
-            !openSideBar && (
-              <ChevronRight
-                className='w-6 h-6 hover:cursor-pointer hidden md:block'
-                onClick={() => setOpenSideBar(!openSideBar)}
-              />
-            )
-          }
+      {openSideBar && (
+        <Sidebar onClickBtnOpenSideBar={() => setOpenSideBar(!openSideBar)} />
+      )}
+
+      <main className="flex-1 flex flex-col p-6 bg-gray-100 overflow-y-auto gap-2">
+        <div className="flex justify-center items-center flex-row w-fit gap-3 mb-6">
+          {!openSideBar && (
+            <ChevronRight
+              className="w-6 h-6 hover:cursor-pointer hidden md:block"
+              onClick={() => setOpenSideBar(!openSideBar)}
+            />
+          )}
           <h1 className="text-2xl font-bold">Dashboard</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -110,8 +105,7 @@ export default function DashboardPage() {
                 <th className="text-sm border-b p-2 text-left">Student Name</th>
                 <th className="text-sm border-b p-2 text-left">Book Title</th>
 
-
-                <th className="text-sm border-b p-2 text-left">Date Issued</th> 
+                <th className="text-sm border-b p-2 text-left">Date Issued</th>
                 <th className="text-sm border-b p-2 text-left">Due Date</th>
               </tr>
             </thead>

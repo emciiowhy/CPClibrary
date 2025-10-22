@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { BookOpen, Home, Book, Users, Plus, Clock, LogOut, ChevronLeft } from 'lucide-react';
+import { BookOpen, BookPlus, Home, Book, Users, Plus, Clock, LogOut, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
@@ -13,7 +13,7 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/books', icon: Book, label: 'Books' },
     { path: '/members', icon: Users, label: 'Students' },
-    { path: '/books/add', icon: Plus, label: 'Add Book' },
+    { path: '/books/add', icon: BookPlus, label: 'Add Book' },
     { path: '/borrow', icon: Clock, label: 'Borrow Records' },
   ];
 
@@ -56,10 +56,10 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
           ))}
         </nav>
         
-        <div className="absolute bottom-6">
+        <div className="w-full">
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="flex items-center space-x-3 px-4 py-3 text-red-300 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
+            className="flex items-center w-full space-x-3 px-4 py-3 text-red-300 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
           >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
