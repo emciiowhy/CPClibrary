@@ -112,11 +112,11 @@ export default function DashboardPage() {
             <tbody>
               {recentRecords.map((record) => (
                 <tr key={record.id}>
-                  <td className="text-xs border-b p-2">{record.studentName}</td>
-                  <td className="text-xs border-b p-2">{record.bookTitle}</td>
+                  <td className="text-sm border-b p-2">{record.studentName}</td>
+                  <td className="text-sm border-b p-2">{record.bookTitle}</td>
 
-                  <td className="text-xs border-b p-2">{record.dateIssued}</td>
-                  <td className="text-xs border-b p-2">{record.dueDate}</td>
+                  <td className="text-sm border-b p-2">{record.dateIssued}</td>
+                  <td className="text-sm border-b p-2">{record.dueDate}</td>
                 </tr>
               ))}
             </tbody>
