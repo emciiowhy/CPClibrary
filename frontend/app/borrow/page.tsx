@@ -21,7 +21,7 @@ export default function BorrowBookPage() {
               onClick={() => setOpenSideBar(!openSideBar)}
             />
           )}
-          <h1 className="text-2xl font-bold">Borrow Books</h1>
+          <h1 className="text-2xl font-bold">Transaction History</h1>
         </div>
       </main>
     </div>

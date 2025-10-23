@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { button, div } from "framer-motion/client";
+import Cpc from '@/../public/cpc-logo.png';
 
 export default function Header() {
   const router = useRouter();
@@ -37,7 +38,8 @@ export default function Header() {
     <>
       <header className="bg-indigo-900 text-white p-6 flex justify-between items-center px-15 md:hidden">
         <div className="flex items-center space-x-3">
-          <BookOpen className="w-8 h-8"/>
+          {/* <BookOpen className="w-8 h-8"/> */}
+          <img src={Cpc.src} alt="Cpc Logo" className="w-10 h-10 border-white border-2 rounded-full"/>
             <div className="flex flex-col">
               <h1 className="text-xl font-semibold">CPC Libray</h1>
               <p className="text-xs text-indigo-300">Admin Panel</p>

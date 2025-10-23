@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { BookOpen, BookPlus, Home, Book, Users, Plus, Clock, LogOut, ChevronLeft } from 'lucide-react';
+import { BookOpen, BookPlus, Home, Book, Users, Clock, LogOut, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
+import Cpc from '@/../public/cpc-logo.png';
 
 export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
   const router = useRouter();
@@ -28,7 +29,8 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
         <div className="mb-8">
           <div className="flex justify-between items-center space-x-3">
               <div className='flex items-center space-x-3'>
-                <BookOpen className="w-8 h-8" />
+                {/* <BookOpen className="w-8 h-8" /> */}
+                <img src={Cpc.src} alt="Cpc Logo" className="w-10 h-10 border-white border-2 rounded-full"/>
                 <div>
                   <h2 className="font-bold text-lg">CPC Library</h2>
                   <p className="text-xs text-indigo-300">Admin Panel</p>

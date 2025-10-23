@@ -8,7 +8,7 @@ import DatabaseManagementBook from "./images/DatabaseManagementSystem.png";
 import IntroductionToTourismAndHospitalityInBC from "./images/IntroductionToTourismAndHospitalityinBC.jpg";
 import PrincipleOfTeaching1 from "./images/PrincipleOfTeaching1.jpg";
 import PrincipleOfTeaching2 from "./images/PrincipleOfTeaching2.jpg";
-import { ChevronRight, Search } from "lucide-react";
+import { ChevronRight, Search, PanelRightClose } from "lucide-react";
 import BookCard from "@/components/books/BookCard";
 
 interface BookType {
@@ -84,7 +84,7 @@ const page = () => {
       <main className="flex-1 flex flex-col p-6 bg-gray-100 overflow-y-auto gap-4">
         <div className="flex justify-center items-center flex-row w-fit gap-3 mb-6">
           {!openSideBar && (
-            <ChevronRight
+            <PanelRightClose
               className="w-6 h-6 hover:cursor-pointer hidden md:block"
               onClick={() => setOpenSideBar(!openSideBar)}
             />

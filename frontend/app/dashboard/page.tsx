@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Book, Users, Clock, ChevronRight } from "lucide-react";
+import { Book, Users, Clock, ChevronRight, PanelRightClose } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 
@@ -66,7 +66,7 @@ export default function DashboardPage() {
       <main className="flex-1 flex flex-col p-6 bg-gray-100 overflow-y-auto gap-2">
         <div className="flex justify-center items-center flex-row w-fit gap-3 mb-6">
           {!openSideBar && (
-            <ChevronRight
+            <PanelRightClose
               className="w-6 h-6 hover:cursor-pointer hidden md:block"
               onClick={() => setOpenSideBar(!openSideBar)}
             />

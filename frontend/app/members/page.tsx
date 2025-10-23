@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-import { ChevronRight, Search } from "lucide-react";
+import { ChevronRight, Search, PanelRightClose } from "lucide-react";
 
 interface StudentType {
   id: number;
@@ -61,7 +61,7 @@ export default function MembersPage() {
       <main className="flex-1 flex flex-col p-6 bg-gray-100 overflow-y-auto gap-4 h-screen">
         <div className="flex justify-center items-center flex-row w-fit gap-3 mb-6">
           {!openSideBar && (
-            <ChevronRight
+            <PanelRightClose
               className="w-6 h-6 hover:cursor-pointer hidden md:block"
               onClick={() => setOpenSideBar(!openSideBar)}
             />
@@ -124,7 +124,7 @@ export default function MembersPage() {
                 .map((student) => (
                   <div
                     key={student.id}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                    className="grid grid-cols-1 sm:grid-cols-5 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
                   >
                     <div className="flex md:block justify-start md:text-center">
                       <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
@@ -164,7 +164,7 @@ export default function MembersPage() {
                 .map((student) => (
                   <div
                     key={student.id}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                    className="grid grid-cols-1 sm:grid-cols-5 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
                   >
                     <div className="flex md:block justify-start md:text-center">
                       <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
