@@ -16,7 +16,7 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Add authentication logic here
-    router.push('/dashboard');
+    router.push('/admin/dashboard');
   };
 
   return (

@@ -21,11 +21,11 @@ export default function Header() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
-    { path: "/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/books", icon: Book, label: "Books" },
-    { path: "/members", icon: Users, label: "Students" },
-    { path: "/books/add", icon: Plus, label: "Add Book" },
-    { path: "/borrow", icon: Clock, label: "Borrow Records" },
+    { path: "/admin/dashboard", icon: Home, label: "Dashboard" },
+    { path: "/admin/books", icon: Book, label: "Books" },
+    { path: "/admin/members", icon: Users, label: "Students" },
+    { path: "/admin/books/add", icon: Plus, label: "Add Book" },
+    { path: "/admin/borrow", icon: Clock, label: "Borrow Records" },
   ];
 
   const handleLogout = () => {
