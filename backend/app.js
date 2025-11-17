@@ -4,11 +4,17 @@ import morgan from "morgan";
 import studentsRoutes from './routes/studentsRoutes.js';
 import adminsRoutes from './routes/adminsRoutes.js'
 import booksRoutes from './routes/booksRoutes.js'
+import cookieParser from "cookie-parser";
 
 const app = express();
-app.use(cors());
+
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cookieParser());
+app.use(cors({
+  origin: "*",
+  credentials: true,
+}));
 
 app.get('/', (req, res) => {
   res("hi");

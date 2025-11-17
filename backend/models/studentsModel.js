@@ -1,4 +1,5 @@
 import { pool } from '../db.js';
+import bcrypt from 'bcryptjs'
 
 export const getAllStudents = async () => {
   const result = await pool.query("SELECT * FROM students");
@@ -12,7 +13,10 @@ export const registerStudents = async (req) => {
     VALUES ($1, $2, $3, $4)
     RETURNING *;
   `;
-  const values = [name, email, schoolId, password];
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const values = [name, email, schoolId, hashedPassword];
   const result = await pool.query(query, values);
 
   return result.rows[0];

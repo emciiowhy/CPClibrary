@@ -1,5 +1,5 @@
 import express from 'express';
-import { fetchAdmins } from '../controllers/adminsController.js';
+import { fetchAdmins } from '../controllers/admins/adminsController.js';
 
 const router = express.Router();
 

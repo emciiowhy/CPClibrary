@@ -1,4 +1,4 @@
-import { getAllAdmins } from "../models/adminsModel.js";
+import { getAllAdmins } from "../../models/adminsModel.js";
 
 export const fetchAdmins = async (req, res) => {
   try {
