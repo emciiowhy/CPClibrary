@@ -1,8 +1,15 @@
 import express from 'express';
-import { fetchAdmins } from '../controllers/admins/adminsController.js';
+import { finalRegisterAdminController, loginAdminController, registerAdminRequestController, verifyAdminOtpController, fetchAdmins, forgotPasswordAdminController } from '../controllers/admins/authAdminsController.js';
+import { jwtAuthenticate } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/admins', fetchAdmins);
+router.get('/admins', jwtAuthenticate, fetchAdmins);
+// router.post('/admins/register', registerAdminsController);
+router.post('/admins/login', loginAdminController);
+router.post('/admins/register/request', registerAdminRequestController);
+router.post('/admins/register/verify-otp', verifyAdminOtpController);
+router.post('/admins/register/final-register', finalRegisterAdminController);
+router.post('/admins/forgot-password', forgotPasswordAdminController)
 
 export default router;

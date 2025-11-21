@@ -9,9 +9,8 @@ export const jwtAuthenticate = (req, res, next) => {
     return res.json({ message: "Unauthorized Access" });
   }
 
-  // const token = jwtPayload.split(" ")[1]; // pag split sa "Bearer
+  // const token = jwtPayload.split(" ")[1];
 
-  // token = jdalkwhdawdwadiowadjwadwad
 
   jwt.verify(jwtPayload, process.env.MY_SECRET_KEY, (err, decoded) => {
 

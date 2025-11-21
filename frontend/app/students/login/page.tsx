@@ -29,16 +29,16 @@ export default function LoginPage() {
               <Image
                 src="/cpc logo.png" 
                 alt="Cordova Public College Logo"
-                width={80}
-                height={80}
+                width={70}
+                height={70}
                 className="rounded-full object-contain"
                 priority
               />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-gray-800">Cordova Public College</h1>
-          <p className="text-gray-600 mt-2">Your Digital Gateway to Learning</p>
+          <h1 className="text-2xl font-bold text-gray-800">Cordova Public College</h1>
+          <p className="text-gray-600 mt-2 text-sm">Your Digital Gateway to Learning</p>
         </div>
 
         {/* === Login Form === */}
@@ -53,7 +53,7 @@ export default function LoginPage() {
                 value={formData.schoolId}
                 onChange={(e) => setFormData({ ...formData, schoolId: e.target.value })}
                 placeholder="Enter your School ID"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
@@ -69,7 +69,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="Enter your password"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
@@ -84,9 +84,9 @@ export default function LoginPage() {
                 onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
                 className="mr-2"
               />
-              <span className="text-gray-600">Remember me</span>
+              <span className="text-gray-600 text-sm">Remember me</span>
             </label>
-            <a href="#" className="text-indigo-600 hover:text-indigo-800">
+            <a href="#" className="text-sm text-indigo-600 hover:text-indigo-800">
               Forgot Password?
             </a>
           </div>
@@ -94,18 +94,18 @@ export default function LoginPage() {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
           >
             Login
           </button>
 
           {/* Sign Up Link */}
           <div className="text-center">
-            <span className="text-gray-600">Don’t have an account? </span>
+            <span className="text-gray-600 text-sm">Don’t have an account? </span>
             <button
               type="button"
               onClick={() => router.push('/signup')}
-              className="text-indigo-600 hover:text-indigo-800 font-semibold"
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
             >
               Sign Up
             </button>

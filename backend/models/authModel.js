@@ -21,3 +21,13 @@ export const findStudentsBySchoolId = async (schoolId) => {
   const result = await pool.query(query, [schoolId]);
   return result.rows[0];
 }
+
+export const findAdminsByEmail = async (email) => {
+  const query = `
+    SELECT * FROM admins
+    WHERE email = $1
+    LIMIT 1;
+  `
+  const result = await pool.query(query, [email]);
+  return result.rows[0];
+}

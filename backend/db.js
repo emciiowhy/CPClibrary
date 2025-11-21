@@ -5,11 +5,13 @@ dotenv.config();
 const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGCHANNELBINDING} = process.env;
 
 export const pool = new Pool({
-  host: PGHOST,
-  database: PGDATABASE,
-  ssl: {rejectUnauthorized: false},
-  user: PGUSER,
-  password: PGPASSWORD,
-  channel_binding: PGCHANNELBINDING,
+  // host: PGHOST,
+  // database: PGDATABASE,
+  // ssl: {rejectUnauthorized: false},
+  // user: PGUSER,
+  // password: PGPASSWORD,
+  // channel_binding: PGCHANNELBINDING,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {rejectUnauthorized: false}
 });
 

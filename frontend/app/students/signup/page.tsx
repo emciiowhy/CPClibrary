@@ -36,13 +36,13 @@ export default function SignUpPage() {
             <Image
               src="/cpc logo.png"
               alt="CPC Logo"
-              width={100}
-              height={100}
+              width={70}
+              height={70}
               className="rounded-full shadow-md object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">Cordova Public College</h1>
-          <p className="text-gray-600 mt-2">Create your CPC eLibrary account</p>
+          <h1 className="text-2xl font-bold text-gray-800">Cordova Public College</h1>
+          <p className="text-gray-600 mt-2 text-sm">Create your CPC eLibrary account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -56,7 +56,7 @@ export default function SignUpPage() {
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 placeholder="Enter your full name"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
@@ -72,7 +72,7 @@ export default function SignUpPage() {
                 value={formData.schoolId}
                 onChange={(e) => setFormData({ ...formData, schoolId: e.target.value })}
                 placeholder="Enter your School ID"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
@@ -88,7 +88,7 @@ export default function SignUpPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="Enter your email"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
@@ -104,7 +104,7 @@ export default function SignUpPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="Enter your password"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
@@ -120,7 +120,7 @@ export default function SignUpPage() {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 placeholder="Confirm your password"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
@@ -129,18 +129,18 @@ export default function SignUpPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
           >
             Sign Up
           </button>
 
           {/* Already have an account */}
           <div className="text-center">
-            <span className="text-gray-600">Already have an account? </span>
+            <span className="text-gray-600 text-sm">Already have an account? </span>
             <button
               type="button"
               onClick={() => router.push('/login')}
-              className="text-indigo-600 hover:text-indigo-800 font-semibold"
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
             >
               Login
             </button>

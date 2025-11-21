@@ -1,19 +1,5 @@
 import { getAllStudents, registerStudents} from '../../models/studentsModel.js';
 
-export const fetchStudents = async (req, res) => {
-  try {
-    const user = req.user; 
-
-    console.log("Authenticated user:", user.id);
-    const students = await getAllStudents();
-
-    res.json(students);
-  } catch (error) {
-    res.status(500).json({error: "FetchStudents Error"});
-    console.error("FetchStudents Error:", error.message);
-  }
-};
-
 export const registerStudentsController = async (req, res) => {
   try {
     const newStudent = await registerStudents(req);
