@@ -3,21 +3,45 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { User, Lock } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
+import api from '@/lib/api';
+import AlertModal from '@/components/alert';
+import { useAdmin } from '@/app/context/AdminContext';
 
-export default function LoginPage() {
+export default function LoginPageAdmin() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    schoolId: '',
-    password: '',
-    rememberMe: false,
-  });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+  const [alertMessage, setAlertMessage] = useState('');
+  const {admin, setAdminData, clearAdminData} = useAdmin();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add authentication logic here
-    router.push('/admin/dashboard');
-  };
+
+    try {
+      const result = await api.post('/api/admins/login', {email, password});
+      if (result.data.success) {
+        const name = result.data.admin.name;
+        setAdminData({name: name, email: email});
+
+        setAlertType('success');
+        setAlertMessage('Login successful! Redirecting to dashboard...');
+        setAlertOpen(true);
+        setTimeout(() => {
+          router.push('/admin/dashboard');
+          setAlertOpen(false);
+        }, 2000);
+        return;
+      }
+
+    } catch (error: any) {
+      alert(error.response.data.message || 'Login failed. Please try again.');
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -38,23 +62,23 @@ export default function LoginPage() {
           </div>
 
           <h1 className="text-2xl font-bold text-gray-800">Cordova Public College</h1>
-          <p className="text-gray-600 mt-2 text-sm">Your Digital Gateway to Learning</p>
+          <p className="text-gray-600 mt-2 text-sm">Login as admin</p>
         </div>
 
         {/* === Login Form === */}
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {/* School ID */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">School ID</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
             <div className="relative">
-              <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
-                type="text"
-                value={formData.schoolId}
-                onChange={(e) => setFormData({ ...formData, schoolId: e.target.value })}
-                placeholder="Enter your School ID"
+                type="email"
+                placeholder="Enter your email"
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
+                value={email}
+                onChange={(e) => {setEmail(e.target.value)}}
               />
             </div>
           </div>
@@ -66,27 +90,18 @@ export default function LoginPage() {
               <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
                 type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="Enter your password"
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
 
           {/* Remember Me + Forgot Password */}
           <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.rememberMe}
-                onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                className="mr-2"
-              />
-              <span className="text-gray-600 text-sm">Remember me</span>
-            </label>
-            <a href="#" className="text-sm text-indigo-600 hover:text-indigo-800">
+            <a onClick={() => router.push('/admin/auth/forgot-password')} className="text-sm text-indigo-600 hover:text-indigo-800 cursor-pointer">
               Forgot Password?
             </a>
           </div>
@@ -104,7 +119,7 @@ export default function LoginPage() {
             <span className="text-gray-600 text-sm">Don’t have an account? </span>
             <button
               type="button"
-              onClick={() => router.push('/signup')}
+              onClick={() => router.push('/admin/auth/register')}
               className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
             >
               Sign Up
@@ -112,6 +127,13 @@ export default function LoginPage() {
           </div>
         </form>
       </div>
+
+      <AlertModal 
+        isOpen={alertOpen}
+        type={alertType}
+        message={alertMessage}
+        onClose={() => setAlertOpen(false)}
+      />
     </div>
   );
 }

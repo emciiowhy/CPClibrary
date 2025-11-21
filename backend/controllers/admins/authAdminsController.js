@@ -22,30 +22,42 @@ export const loginAdminController = async (req, res) => {
   try {
     const { email, password } = req.body;
     const admin = await findAdminsByEmail(email);
-    if (!admin) return res.status(401).json({ message: "Invalid email" });
+    if (!admin) return res.status(401).json({ 
+      message: "Invalid email",
+      success: false
+    });
 
     const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid password" });
+    if (!isMatch) return res.status(401).json({ 
+      message: "Invalid password",
+      success: false
+    });
+
     const token = jwt.sign(
       { id: admin.id, email: admin.email },
       process.env.MY_SECRET_KEY,
       { expiresIn: "1hr" }
     );
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "development", // Only send over HTTPS in production
-      sameSite: "Strict",
+      // secure: process.env.NODE_ENV === "development", // Only send over HTTPS in production
+      secure: false,
+      sameSite: "Lax",
       maxAge: 60 * 60 * 1000, // 1 hour in milliseconds
     });
+
     res.json({
       message: "Login Successfully",
       token,
+      success: true,
       admin: {
         id: admin.id,
         name: admin.name,
         email: admin.email,
       },
     });
+    
   } catch (error) {
     res.status(500).json({ message: "Login error", error: error.message });
   }
@@ -93,13 +105,15 @@ export const registerAdminRequestController = async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     return res.json({
-      message: "OTP sent to you email",
+      message: "OTP sent to your email",
+      success: true,
       otp,
     });
     
   } catch (error) {
     return res.status(500).json({
       message: "Failed to request register",
+      success: false,
       error: error.message,
     });
   }
@@ -183,7 +197,9 @@ export const finalRegisterAdminController = async (req, res) => {
     res.status(201).json({
       message: "Admin registered successfully",
       admin: newAdmin.rows[0],
+      success: true,
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Failed to register admin",
@@ -200,6 +216,16 @@ export const forgotPasswordAdminController = async (req, res) => {
     if (!user) return res.status(404).json({message: "Email not found"});
 
     const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await pool.query(
+      `
+      INSERT INTO admin_otps (email, otp, expires_at)
+      VALUES ($1, $2, NOW() + INTERVAL '5 minutes')
+      ON CONFLICT (email)
+      DO UPDATE SET otp = $2, expires_at = NOW() + INTERVAL '10 minutes'
+      `,
+      [email, OTP]
+    );
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -218,8 +244,63 @@ export const forgotPasswordAdminController = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.json({message: "OTP sent to your email", otp: OTP})
+    res.json({
+      message: "OTP sent to your email", 
+      otp: OTP,
+      success: true
+    });
+
   } catch (error) {
-    return res.status(500).json({message: "Error in forgot password", error: error.message});
+    return res.status(500).json({
+      message: "Error in forgot password", 
+      error: error.message,
+      success: false
+    });
+  }
+}
+
+export const resetPasswordAdminController = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const user = await findAdminsByEmail(email);
+    if (!user) return res.status(404).json({message: "Email not found"});
+
+    const otpRecord = await pool.query(
+      `
+      SELECT * FROM admin_otps WHERE email = $1
+    `,
+      [email]
+    );
+
+    if (otpRecord.rows.length === 0) {
+      return res.status(400).json({
+        message:
+          "Email is not verified. Please complete OTP verification first",
+      });
+    }
+
+    if (otpRecord.rows[0].otp !== otp) {
+      return res.status(400).json({message: "Invalid OTP"});
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      `
+      UPDATE admins
+      SET password = $1
+      WHERE email = $2
+      `,
+      [hashedPassword, email]
+    );
+
+    return res.json({message: "Password reset successful", success: true});
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error in reset password", 
+      error: error.message,
+      success: false
+    });
   }
 }

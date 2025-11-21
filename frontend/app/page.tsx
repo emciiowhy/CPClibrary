@@ -40,13 +40,13 @@ export default function Home() {
         {/* === Buttons === */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            onClick={() => router.push("/students/login")}
+            onClick={() => router.push("/students/auth/login")}
             className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg"
           >
             Login
           </button>
           <button
-            onClick={() => router.push("/students/signup")}
+            onClick={() => router.push("/students/auth/register")}
             className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all border-2 border-indigo-600 shadow-md hover:shadow-lg"
           >
             Sign Up
