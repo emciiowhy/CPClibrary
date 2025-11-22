@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function Home() {
         <div className="flex items-center justify-center mb-8">
           <div className="bg-white p-4 rounded-full shadow-lg">
             <Image
-              src="/cpc logo.png" 
+              src="/cpc logo.png"
               alt="Cordova Public College Logo"
               width={120}
               height={120}
@@ -34,19 +34,19 @@ export default function Home() {
           Cordova Public College
         </h1>
         <p className="text-lg text-gray-600 mb-10 tracking-wide">
-          Your Digital Gateway to Learning 
+          Your Digital Gateway to Learning
         </p>
 
         {/* === Buttons === */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            onClick={() => router.push('/login')}
+            onClick={() => router.push("/login")}
             className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg"
           >
             Login
           </button>
           <button
-            onClick={() => router.push('/signup')}
+            onClick={() => router.push("/signup")}
             className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all border-2 border-indigo-600 shadow-md hover:shadow-lg"
           >
             Sign Up
