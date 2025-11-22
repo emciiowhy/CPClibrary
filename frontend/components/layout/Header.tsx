@@ -26,6 +26,7 @@ export default function Header() {
     { path: "/members", icon: Users, label: "Students" },
     { path: "/books/add", icon: Plus, label: "Add Book" },
     { path: "/borrow", icon: Clock, label: "Borrow Records" },
+    { path: "/borrow/issue", icon: BookOpen, label: "Issue Book" },
   ];
 
   const handleLogout = () => {

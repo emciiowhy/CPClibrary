@@ -1,0 +1,6 @@
+- [ ] Update backend/schema.js to add fee column to borrowRecords
+- [ ] Modify return book endpoint in backend/index.js to calculate fee (5 pesos per day overdue)
+- [ ] Update frontend/types/borrow.ts to include fee in BorrowRecord
+- [ ] Add Fee column to BorrowRecordTable.tsx
+- [ ] Update borrow records API to include fee in responses
+- [ ] Test the feature by returning a book late

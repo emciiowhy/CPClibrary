@@ -16,6 +16,7 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
     { path: '/members', icon: Users, label: 'Students' },
     { path: '/books/add', icon: BookPlus, label: 'Add Book' },
     { path: '/borrow', icon: Clock, label: 'Borrow Records' },
+    { path: '/borrow/issue', icon: BookOpen, label: 'Issue Book' },
   ];
 
   const handleLogout = () => {
