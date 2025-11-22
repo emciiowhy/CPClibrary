@@ -20,7 +20,7 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
 
   const handleLogout = () => {
     // Add logout logic
-    router.push('/login');
+    router.push('/students/auth/login');
   };
 
   return (

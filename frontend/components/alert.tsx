@@ -1,41 +1,57 @@
-'use client';
+import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-import { X } from 'lucide-react';
+export function AlertModal(props: any) {
+  const alertType = props.alertType;
 
-interface AlertModalProps {
-  isOpen: boolean;
-  type?: 'success' | 'error' | 'info';
-  message: string;
-  onClose: () => void;
-}
-
-export default function AlertModal({ isOpen, type = 'info', message, onClose }: AlertModalProps) {
-  if (!isOpen) return null;
-
-  let bgColor = 'bg-blue-100 text-blue-800';
-  if (type === 'success') bgColor = 'bg-green-100 text-green-800';
-  if (type === 'error') bgColor = 'bg-red-100 text-red-800';
+  if (!props.openAlert) return null; // Prevents rendering unless open
 
   return (
-    <div className="fixed inset-x-0 top-4 z-50 flex justify-center">
-      <div className={`bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 ${bgColor} relative`}>
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 w-full max-w-xl flex flex-col gap-4 z-50 px-4">
 
-        <div className="text-center">
-          <p className="text-sm sm:text-base">{message}</p>
-          <button
-            onClick={onClose}
-            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
-          >
-            OK
-          </button>
-        </div>
-      </div>
+      {/* Success Alert */}
+      {alertType === "success" && (
+        <Alert className="flex items-start gap-3 rounded-xl shadow-lg border border-green-300 bg-green-50">
+          <CheckCircle2Icon className="h-5 w-5 text-green-600 mt-1" />
+          <div>
+            <AlertTitle className="font-semibold text-green-700">
+              {props.title}
+            </AlertTitle>
+            <AlertDescription className="text-green-600 text-sm">
+              {props.message}
+            </AlertDescription>
+          </div>
+        </Alert>
+      )}
+
+      {/* Error Alert */}
+      {alertType === "error" && (
+        <Alert
+          variant="destructive"
+          className="flex items-start gap-3 rounded-xl shadow-lg border border-red-300 bg-red-50"
+        >
+          <AlertCircleIcon className="h-5 w-5 text-red-600 mt-1" />
+          <div>
+            <AlertTitle className="font-semibold text-red-700">
+              {props.title}
+            </AlertTitle>
+            <AlertDescription className="text-red-600 text-sm mt-1">
+              <p>{props.message}</p>
+            </AlertDescription>
+          </div>
+        </Alert>
+      )}
+
+      {/* Info Alert */}
+      {alertType === "info" && (
+        <Alert className="flex items-center gap-3 rounded-xl shadow-lg border border-blue-300 bg-blue-50 py-3 px-4">
+          <PopcornIcon className="h-5 w-5 text-blue-600" />
+          <AlertTitle className="font-semibold text-blue-700">
+            {props.message}
+          </AlertTitle>
+        </Alert>
+      )}
+      
     </div>
   );
 }

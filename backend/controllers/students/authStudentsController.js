@@ -26,10 +26,10 @@ export const loginStudentController = async (req, res) => {
     const {schoolId, password} = req.body;
 
     const user = await findStudentsBySchoolId(schoolId);
-    if (!user) return res.status(401).json({message: "Invalid schoolId"});
+    if (!user) return res.status(401).json({message: "Invalid schoolId", success: false});
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({message: "Invalid password"});
+    if (!isMatch) return res.status(401).json({message: "Invalid password", success: false});
 
     const token = jwt.sign(
       {id: user.id, email: user.email, schoolId: user.student_id},
@@ -49,6 +49,7 @@ export const loginStudentController = async (req, res) => {
     res.json({
       message: "Login Successfully",
       token,
+      success: true,
       user: {
         id: user.id,
         name: user.name,
@@ -69,14 +70,16 @@ export const registerStudentRequestController = async (req, res) => {
     const existingStudentByEmail = await findStudentsByEmail(email);
     if (existingStudentByEmail) {
       return res.status(409).json({
-        message: "Email already exist. Please use another email"
+        message: "Email already exist. Please use another email",
+        success: false
       });
     }
 
     const existingStudentBySchoolId = await findStudentsBySchoolId();
     if (existingStudentBySchoolId) {
       return res.status(409).json({
-        message: "This school ID is already registered"
+        message: "This school ID is already registered",
+        success: false
       });
     };
 
@@ -112,12 +115,17 @@ export const registerStudentRequestController = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    return res.json({message: "OTP sent to you email", otp});
+    return res.json({
+      message: "OTP sent to you email", 
+      otp,
+      success: false
+    });
 
 
   } catch (error) {
     return res.status(500).json({
       message: "Failed to request register",
+      success: false,
       error: error.message
     })
   }

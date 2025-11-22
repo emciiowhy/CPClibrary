@@ -34,7 +34,7 @@ export default function Home() {
           Cordova Public College
         </h1>
         <p className="text-lg text-gray-600 mb-10 tracking-wide">
-          Your Digital Gateway to Learning
+          Register as admin
         </p>
 
         {/* === Buttons === */}

@@ -77,16 +77,7 @@ export default function LoginPage() {
 
           {/* Remember Me + Forgot Password */}
           <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.rememberMe}
-                onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                className="mr-2"
-              />
-              <span className="text-gray-600 text-sm">Remember me</span>
-            </label>
-            <a href="#" className="text-sm text-indigo-600 hover:text-indigo-800">
+            <a onClick={() => router.push('/students/auth/forgot-password')} className="text-sm text-indigo-600 hover:text-indigo-800">
               Forgot Password?
             </a>
           </div>
@@ -104,7 +95,7 @@ export default function LoginPage() {
             <span className="text-gray-600 text-sm">Don’t have an account? </span>
             <button
               type="button"
-              onClick={() => router.push('/admin/auth/register')}
+              onClick={() => router.push('/students/auth/register')}
               className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
             >
               Sign Up

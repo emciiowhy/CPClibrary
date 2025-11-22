@@ -5,39 +5,53 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Mail, Lock } from 'lucide-react';
 import api from '@/lib/api';
-import AlertModal from '@/components/alert';
 import { useAdmin } from '@/app/context/AdminContext';
+import {AlertModal} from '@/components/alert';
+import { ButtonSubmit } from '@/components/button';
+import { button } from 'framer-motion/client';
 
 export default function LoginPageAdmin() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
+  const [alertType, setAlertType] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+  const [alertTitle, setAlertTitle] = useState('');
+  const [openAlert, setOpenAlert] = useState(false);
   const {admin, setAdminData, clearAdminData} = useAdmin();
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
+      setSubmitted(true);
       const result = await api.post('/api/admins/login', {email, password});
       if (result.data.success) {
         const name = result.data.admin.name;
         setAdminData({name: name, email: email});
 
         setAlertType('success');
-        setAlertMessage('Login successful! Redirecting to dashboard...');
-        setAlertOpen(true);
-        setTimeout(() => {
-          router.push('/admin/dashboard');
-          setAlertOpen(false);
-        }, 2000);
-        return;
+        setAlertTitle('Login Successful');
+        setAlertMessage(`Welcome, ${name}!`);
+        setOpenAlert(true);
+
+        alert('Login successful! Redirecting to dashboard...');
+        router.push('/admin/dashboard');
       }
 
     } catch (error: any) {
+      setAlertType('error');
+      setAlertTitle(error.response.data.message || 'Login Failed');
+      setAlertMessage(`Please check your credentials and try again.`);
+      setOpenAlert(true);
+      setSubmitted(false);
+
+      setTimeout(() => {
+        setOpenAlert(false);
+      }, 4000);
+
       alert(error.response.data.message || 'Login failed. Please try again.');
     }
   }
@@ -45,6 +59,14 @@ export default function LoginPageAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      
+      <AlertModal
+        alertType={alertType}
+        title={alertTitle}
+        message={alertMessage}
+        openAlert={openAlert}
+      />
+      
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* === Logo Section === */}
         <div className="text-center mb-8">
@@ -107,12 +129,15 @@ export default function LoginPageAdmin() {
           </div>
 
           {/* Login Button */}
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
-          >
-            Login
-          </button>
+          <ButtonSubmit props={{
+            submitted: submitted,
+            buttonType: 'submit',
+            className: 'text-md w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors',
+            btnText: 'Login',
+            btnLoadingText: 'Logging in',
+          }} />
+
+          
 
           {/* Sign Up Link */}
           <div className="text-center">
@@ -127,13 +152,6 @@ export default function LoginPageAdmin() {
           </div>
         </form>
       </div>
-
-      <AlertModal 
-        isOpen={alertOpen}
-        type={alertType}
-        message={alertMessage}
-        onClose={() => setAlertOpen(false)}
-      />
     </div>
   );
 }

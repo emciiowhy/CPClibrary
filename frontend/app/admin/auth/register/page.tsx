@@ -5,8 +5,10 @@ import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Mail, Lock, BookOpen } from 'lucide-react';
-import AlertModal from '@/components/alert';
 import { useAdmin } from '@/app/context/AdminContext';
+import {AlertModal} from '@/components/alert';
+import { ButtonSubmit } from '@/components/button';
+
 
 export default function SignUpPageAdmin() {
   const router = useRouter();
@@ -19,17 +21,15 @@ export default function SignUpPageAdmin() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
   const [alertMessage, setAlertMessage] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setSubmitted(true);
     if (password !== confirmPassword) {
-      setAlertOpen(true);
-      setAlertType('error');
-      setAlertMessage('Passwords do not match.');
-      setTimeout(() => {
-        setAlertOpen(false);
-      }, 3000);
+      alert('Passwords do not match.');
+      setSubmitted(false);
       return;
     }
 
@@ -37,9 +37,7 @@ export default function SignUpPageAdmin() {
       const result = await api.post('/api/admins/register/request', {email});
 
       if (result.data.success) {
-        setAlertMessage(result.data.message || 'Registration successful. Please check your email for OTP.');
-        setAlertType('success');
-        setAlertOpen(true);
+        alert(result.data.message || 'Registration successful! Please check your email for OTP.');
 
         setAdminData({ 
           name: name,
@@ -47,26 +45,15 @@ export default function SignUpPageAdmin() {
           password: password,
           schoolId: ''
         });
-
-        setTimeout(() => {
-          setAlertOpen(false);
-          router.push('/admin/auth/register/verify-otp');
-        }, 1500);
+        
+        router.push('/admin/auth/register/verify-otp');
       } else {
-        setAlertOpen(true);
-        setAlertType('error');
-        setAlertMessage(result.data.message || 'Registration failed.');
-        setTimeout(() => {
-          setAlertOpen(false);
-        }, 3000);
+        setSubmitted(false);
+        alert(result.data.message || 'Registration failed.')
       }
     } catch (error: any) {
-      setAlertOpen(true);
-      setAlertType('error');
-      setAlertMessage(error.response?.data?.message || 'Network error. Please try again.');
-      setTimeout(() => {
-        setAlertOpen(false);
-      }, 3000);
+      setSubmitted(false);
+      alert(error.response?.data?.message || 'Network error. Please try again.')
     }
   }
 
@@ -154,12 +141,13 @@ export default function SignUpPageAdmin() {
           </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
-          >
-            Register
-          </button>
+          <ButtonSubmit props={{
+            submitted: submitted,
+            buttonType: 'submit',
+            className: 'text-md w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors',
+            btnText: 'Register',
+            btnLoadingText: 'Registiring',
+          }} />
 
           {/* Already have an account */}
           <div className="text-center">
@@ -173,13 +161,6 @@ export default function SignUpPageAdmin() {
           </div>
         </form>
       </div>
-
-      <AlertModal 
-        isOpen={alertOpen}
-        type={alertType}
-        message={alertMessage}
-        onClose={() => {setAlertOpen(false);}}
-      />
     </div>
   );
 }

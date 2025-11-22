@@ -5,7 +5,6 @@ import { createContext, useContext, useState } from "react";
 type AdminData = {
   name: string;
   email: string;
-  schoolId: string;
   password: string;
 };
 
@@ -21,7 +20,6 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [admin, setAdminState] = useState<AdminData>({
     name: "",
     email: "",
-    schoolId: "",
     password: "",
   });
 
@@ -33,7 +31,6 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     setAdminState({
       name: "",
       email: "",
-      schoolId: "",
       password: "",
     });
   };
