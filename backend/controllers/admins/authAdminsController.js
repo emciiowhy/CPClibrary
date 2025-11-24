@@ -222,7 +222,7 @@ export const forgotPasswordAdminController = async (req, res) => {
       INSERT INTO admin_otps (email, otp, expires_at)
       VALUES ($1, $2, NOW() + INTERVAL '5 minutes')
       ON CONFLICT (email)
-      DO UPDATE SET otp = $2, expires_at = NOW() + INTERVAL '10 minutes'
+      DO UPDATE SET otp = $2, expires_at = NOW() + INTERVAL '5 minutes'
       `,
       [email, OTP]
     );
@@ -295,7 +295,18 @@ export const resetPasswordAdminController = async (req, res) => {
       [hashedPassword, email]
     );
 
-    return res.json({message: "Password reset successful", success: true});
+    await pool.query(
+      `
+        DELETE FROM admin_otps
+        WHERE email = $1
+      `, [email]
+    );
+
+    return res.json({
+      message: "Password reset successful", 
+      success: true
+    });
+
   } catch (error) {
     return res.status(500).json({
       message: "Error in reset password", 

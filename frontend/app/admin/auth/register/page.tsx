@@ -8,7 +8,7 @@ import { User, Mail, Lock, BookOpen } from 'lucide-react';
 import { useAdmin } from '@/app/context/AdminContext';
 import {AlertModal} from '@/components/alert';
 import { ButtonSubmit } from '@/components/button';
-
+import { ToastContainer, toast } from 'react-toastify';
 
 export default function SignUpPageAdmin() {
   const router = useRouter();
@@ -37,29 +37,31 @@ export default function SignUpPageAdmin() {
       const result = await api.post('/api/admins/register/request', {email});
 
       if (result.data.success) {
-        alert(result.data.message || 'Registration successful! Please check your email for OTP.');
+        toast.success(result.data.message || 'Registration successful! Please check your email for OTP.');
 
         setAdminData({ 
           name: name,
           email: email,
           password: password,
-          schoolId: ''
         });
         
         router.push('/admin/auth/register/verify-otp');
-      } else {
-        setSubmitted(false);
-        alert(result.data.message || 'Registration failed.')
       }
     } catch (error: any) {
       setSubmitted(false);
-      alert(error.response?.data?.message || 'Network error. Please try again.')
+      if (error.response) {
+        toast.error(error.response.data.message)
+      } else {
+        toast.error(error);
+      }
+      return;
     }
   }
 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <ToastContainer position='top-center'/>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -155,6 +157,7 @@ export default function SignUpPageAdmin() {
             <button
               type="button"
               className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
+              onClick={() => router.push('/admin/auth/login')}
             >
               Login
             </button>

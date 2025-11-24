@@ -6,9 +6,10 @@ import Image from "next/image";
 import { User, Lock, Mail } from "lucide-react";
 import { ButtonSubmit } from "@/components/button";
 import api from "@/lib/api";
-import { ToastContainer, toast } from "react-toastify";
+import { useStudent } from "@/app/context/StudentContext";
+import { toast, ToastContainer } from "react-toastify";
 
-export default function ForgotPasswordAdmin() {
+export default function ForgotPasswordStudent() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -41,7 +42,7 @@ export default function ForgotPasswordAdmin() {
   const otpRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await api.post("/api/admins/forgot-password", { email });
+      const response = await api.post("/api/students/forgot-password", { email });
       if (response.data.success) {
         toast.success("OTP sent to your email.");
         setDisableOtpRequest(true);
@@ -53,9 +54,10 @@ export default function ForgotPasswordAdmin() {
         }, 300000);
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during password reset:", error);
-      toast.error("Invalid Email");
+      console.log(error);
+      toast.error(error.response.data.message);
     }
   };
 
@@ -71,7 +73,7 @@ export default function ForgotPasswordAdmin() {
     
     try {
       const password = newPassword;
-      const response = await api.post("/api/admins/reset-password", {
+      const response = await api.post("/api/students/reset-password", {
         email,
         otp,
         password,
@@ -79,7 +81,7 @@ export default function ForgotPasswordAdmin() {
 
       if (response.data.success) {
         toast.success("Password reset successful. Redirecting to login...");
-        router.push("/admin/auth/login");
+        router.push("/students/auth/login");
       } else {
         toast.error("Password reset failed.");
         setSubmitted(false);
@@ -90,7 +92,7 @@ export default function ForgotPasswordAdmin() {
       if (error.response) {
         toast.error(error.response.data.message);
       } else {
-        toast.error("Invalid OTP");
+        toast.warning("Invalid OTP");
         console.error("Error during password reset submission:", error);
       }
     }
@@ -98,7 +100,7 @@ export default function ForgotPasswordAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <ToastContainer position="top-center" />
+      <ToastContainer position="top-center"/>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">

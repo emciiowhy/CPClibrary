@@ -9,16 +9,13 @@ import { useAdmin } from '@/app/context/AdminContext';
 import {AlertModal} from '@/components/alert';
 import { ButtonSubmit } from '@/components/button';
 import { button } from 'framer-motion/client';
+import { ToastContainer, toast } from 'react-toastify';
 
 export default function LoginPageAdmin() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [alertType, setAlertType] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertTitle, setAlertTitle] = useState('');
-  const [openAlert, setOpenAlert] = useState(false);
   const {admin, setAdminData, clearAdminData} = useAdmin();
   const [submitted, setSubmitted] = useState(false);
 
@@ -32,27 +29,13 @@ export default function LoginPageAdmin() {
         const name = result.data.admin.name;
         setAdminData({name: name, email: email});
 
-        setAlertType('success');
-        setAlertTitle('Login Successful');
-        setAlertMessage(`Welcome, ${name}!`);
-        setOpenAlert(true);
-
-        alert('Login successful! Redirecting to dashboard...');
+        toast.success('Login successful! Redirecting to dashboard...');
         router.push('/admin/dashboard');
       }
 
     } catch (error: any) {
-      setAlertType('error');
-      setAlertTitle(error.response.data.message || 'Login Failed');
-      setAlertMessage(`Please check your credentials and try again.`);
-      setOpenAlert(true);
       setSubmitted(false);
-
-      setTimeout(() => {
-        setOpenAlert(false);
-      }, 4000);
-
-      alert(error.response.data.message || 'Login failed. Please try again.');
+      toast.error(error.response.data.message || 'Login failed. Please try again.');
     }
   }
 
@@ -60,12 +43,7 @@ export default function LoginPageAdmin() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       
-      <AlertModal
-        alertType={alertType}
-        title={alertTitle}
-        message={alertMessage}
-        openAlert={openAlert}
-      />
+      <ToastContainer position='top-center'/>
       
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* === Logo Section === */}

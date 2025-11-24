@@ -40,7 +40,7 @@ export const loginStudentController = async (req, res) => {
      res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'development', // Only send over HTTPS in production
-        sameSite: 'Strict',
+        sameSite: 'Lax',
         maxAge: 60 * 60 * 1000 // 1 hour in milliseconds
     })
 
@@ -50,7 +50,7 @@ export const loginStudentController = async (req, res) => {
       message: "Login Successfully",
       token,
       success: true,
-      user: {
+      student: {
         id: user.id,
         name: user.name,
         schoolId: user.student_id,
@@ -75,7 +75,7 @@ export const registerStudentRequestController = async (req, res) => {
       });
     }
 
-    const existingStudentBySchoolId = await findStudentsBySchoolId();
+    const existingStudentBySchoolId = await findStudentsBySchoolId(schoolId);
     if (existingStudentBySchoolId) {
       return res.status(409).json({
         message: "This school ID is already registered",
@@ -118,7 +118,7 @@ export const registerStudentRequestController = async (req, res) => {
     return res.json({
       message: "OTP sent to you email", 
       otp,
-      success: false
+      success: true
     });
 
 
@@ -148,12 +148,14 @@ export const verifyStudentOtpController = async (req, res) => {
     if (!otpRecord) {
       return res.status(404).json({
         message: "No OTP request found or Invalid OTP",
+        success: false
       });
     };
 
     if (otpRecord.expires_at < new Date()) {
       return res.status(400).json({
         message: "Otp expires. Please request a new one",
+        success: false
       });
     };
 
@@ -166,9 +168,9 @@ export const verifyStudentOtpController = async (req, res) => {
     return res.status(500).json({
       message: "Failed to verify student OTP",
       error: error.message,
+      success: false
     })
   }
-
 }
 
 export const finalRegisterStudentController = async (req, res) => {
@@ -179,6 +181,7 @@ export const finalRegisterStudentController = async (req, res) => {
     if (existingStudentByEmail) {
       return res.status(409).json({
         message: "Email already registered as student",
+        success: false
       })
     }
 
@@ -186,6 +189,7 @@ export const finalRegisterStudentController = async (req, res) => {
     if (existingStudentBySchoolId) {
       return res.status(409).json({
         message: "School Id already registered as student",
+        success: false
       });
     };
 
@@ -200,6 +204,7 @@ export const finalRegisterStudentController = async (req, res) => {
     if (otpRecord.rows.length === 0) {
       return res.status(400).json({
         message: "Email not verified. Please complete OTP verification first",
+        success: false
       });
     };
 
@@ -229,7 +234,8 @@ export const finalRegisterStudentController = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: "Failed to register student",
-      error: error.message
+      error: error.message,
+      success: false
     })
   }
 }
@@ -239,9 +245,22 @@ export const forgotPasswordStudentsController = async (req, res) => {
      const {email} = req.body;
 
     const user = await findStudentsByEmail(email);
-    if (!user) return res.status(404).json({message: "Email not found"});
+    if (!user) return res.status(404).json({
+      message: "Email not found",
+      success: false
+    });
 
     const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await pool.query(
+      `
+      INSERT INTO student_otps (email, otp, expires_at)
+      VALUES ($1, $2, NOW() + INTERVAL '5 minutes')
+      ON CONFLICT (email)
+      DO UPDATE SET otp = $2, expires_at = NOW() + INTERVAL '5 minutes'
+      `,
+      [email, OTP]
+    );
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -260,12 +279,74 @@ export const forgotPasswordStudentsController = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.json({message: "OTP sent to email", otp: OTP});
+    res.json({
+      message: "OTP sent to email", 
+      otp: OTP,
+      success: true,
+    });
 
   } catch (error) {
     return res.status(500).json({
       message: "Error in forgot password", 
-      error: error.message
+      error: error.message,
+      success: false
+    });
+  }
+}
+
+export const resetPasswordStudentsController = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const user = await findStudentsByEmail(email);
+    if (!user) return res.status(404).json({message: "Email not found"});
+
+    const otpRecord = await pool.query(
+      `
+      SELECT * FROM student_otps WHERE email = $1
+    `,
+      [email]
+    );
+
+    if (otpRecord.rows.length === 0) {
+      return res.status(400).json({
+        message:
+          "Email is not verified. Please complete OTP verification first",
+      });
+    }
+
+    if (otpRecord.rows[0].otp !== otp) {
+      return res.status(400).json({message: "Invalid OTP"});
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      `
+      UPDATE students
+      SET password = $1
+      WHERE email = $2
+      `,
+      [hashedPassword, email]
+    );
+
+    await pool.query(
+      `
+        DELETE FROM student_otps
+        WHERE email = $1
+      `, [email]
+    );
+
+    return res.json({
+      message: "Password reset successful", 
+      success: true
+    });
+    
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error in reset password", 
+      error: error.message,
+      success: false
     });
   }
 }

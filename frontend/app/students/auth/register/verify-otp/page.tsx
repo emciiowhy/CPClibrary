@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Lock } from "lucide-react";
 import api from "@/lib/api";
-import { useAdmin } from "@/app/context/AdminContext";
+import { useStudent } from "@/app/context/StudentContext";
 import { ButtonSubmit } from "@/components/button";
-import { ToastContainer, toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
-export default function VerifyOtpPageAdmin() {
+export default function VerifyOtpPageStudent() {
   const router = useRouter();
-  const { admin, clearAdminData } = useAdmin();
+  const { student, clearStudentData } = useStudent();
 
   const [otp, setOtp] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    if (!admin?.email || !admin?.name || !admin?.password) {
+    if (!student?.email || !student?.schoolId || !student?.name || !student?.password) {
       toast.error("Missing registration data. Redirecting to registration page...");
       setSubmitted(false);
       router.push("/admin/auth/register");
@@ -31,18 +31,18 @@ export default function VerifyOtpPageAdmin() {
     setSubmitted(true);
 
     // Check if admin registration data exists
-    if (!admin?.email || !admin?.name || !admin?.password) {
+    if (!student?.email || !student?.name || !student?.password) {
       toast.error("Missing registration data. Redirecting to registration page...");
       setSubmitted(false);
       router.push("/admin/auth/register");
       return;
     }
 
-    const { email, name, password } = admin;
+    const { email, name, password, schoolId } = student;
 
     try {
       // Step 1: Verify OTP
-      const verifyResponse = await api.post("/api/admins/register/verify-otp", { email, otp });
+      const verifyResponse = await api.post("/api/students/register/verify-otp", { email, otp, schoolId });
 
       // Axios treats status >= 400 as error, so this only runs for 2xx
       if (!verifyResponse.data.success) {
@@ -52,26 +52,26 @@ export default function VerifyOtpPageAdmin() {
       }
 
       // Step 2: Final registration
-      const finalResponse = await api.post("/api/admins/register/final-register", { name, email, password });
+      const finalResponse = await api.post("/api/students/register/final-register", { name, email, password, schoolId });
 
       if (finalResponse.data.success) {
         toast.success("Registration successful! Redirecting to login...");
-        clearAdminData();
-        router.push("/admin/auth/login");
+        clearStudentData();
+        router.push("/students/auth/login");
       } else {
         toast.error("Final registration failed: " + (finalResponse.data.message || "Please try again."));
         setSubmitted(false);
       }
     } catch (error: any) {
       // Axios error handling
-      toast.error(error.response?.data?.message || error.message || "Network error. Please try again.");
+      toast.warning(error.response?.data?.message || error.message || "Network error. Please try again.");
       setSubmitted(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <ToastContainer position="top-center" />
+      <ToastContainer position="top-center"/>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* Logo & Header */}
         <div className="text-center mb-8">
