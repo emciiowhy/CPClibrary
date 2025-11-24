@@ -7,7 +7,7 @@ import { User, Lock, Mail } from "lucide-react";
 import { ButtonSubmit } from "@/components/button";
 import api from "@/lib/api";
 import { useStudent } from "@/app/context/StudentContext";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "sonner";
 
 export default function ForgotPasswordStudent() {
   const router = useRouter();
@@ -100,7 +100,6 @@ export default function ForgotPasswordStudent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <ToastContainer position="top-center"/>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">

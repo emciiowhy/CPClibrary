@@ -7,7 +7,7 @@ import { Lock } from "lucide-react";
 import api from "@/lib/api";
 import { useAdmin } from "@/app/context/AdminContext";
 import { ButtonSubmit } from "@/components/button";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "sonner";
 
 export default function VerifyOtpPageAdmin() {
   const router = useRouter();
@@ -15,15 +15,6 @@ export default function VerifyOtpPageAdmin() {
 
   const [otp, setOtp] = useState("");
   const [submitted, setSubmitted] = useState(false);
-
-  useEffect(() => {
-    if (!admin?.email || !admin?.name || !admin?.password) {
-      toast.error("Missing registration data. Redirecting to registration page...");
-      setSubmitted(false);
-      router.push("/admin/auth/register");
-      return;
-    }
-  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +62,6 @@ export default function VerifyOtpPageAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <ToastContainer position="top-center" />
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* Logo & Header */}
         <div className="text-center mb-8">

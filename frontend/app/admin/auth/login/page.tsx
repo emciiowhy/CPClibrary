@@ -9,7 +9,7 @@ import { useAdmin } from '@/app/context/AdminContext';
 import {AlertModal} from '@/components/alert';
 import { ButtonSubmit } from '@/components/button';
 import { button } from 'framer-motion/client';
-import { ToastContainer, toast } from 'react-toastify';
+import {toast} from 'sonner'
 
 export default function LoginPageAdmin() {
   const router = useRouter();
@@ -21,7 +21,6 @@ export default function LoginPageAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       setSubmitted(true);
       const result = await api.post('/api/admins/login', {email, password});
@@ -30,9 +29,8 @@ export default function LoginPageAdmin() {
         setAdminData({name: name, email: email});
 
         toast.success('Login successful! Redirecting to dashboard...');
-        router.push('/admin/dashboard');
+          router.push('/admin/dashboard');
       }
-
     } catch (error: any) {
       setSubmitted(false);
       toast.error(error.response.data.message || 'Login failed. Please try again.');
@@ -42,9 +40,6 @@ export default function LoginPageAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      
-      <ToastContainer position='top-center'/>
-      
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* === Logo Section === */}
         <div className="text-center mb-8">

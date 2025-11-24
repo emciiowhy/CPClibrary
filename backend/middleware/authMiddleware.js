@@ -29,7 +29,7 @@ export const verifyAdminToken = async (req, res, next) => {
     const requestToken = req.cookies.token;
 
     if (!requestToken) {
-      return res.json({
+      return res.status(401).json({
         message: "Token not provided",
         success: false
       });
@@ -74,14 +74,13 @@ export const verifyAdminToken = async (req, res, next) => {
   }
 }
 
-
 export const verifyStudentToken = async (req, res, next) => {
   try {
 
     const requestToken = req.cookies.token;
 
     if (!requestToken) {
-      return res.json({
+      return res.status(401).json({
         message: "Token not provided",
         success: false
       })

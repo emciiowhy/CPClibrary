@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Book, Users, Clock, ChevronRight, PanelRightClose } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Book,
+  Users,
+  Clock,
+  ChevronRight,
+  PanelRightClose,
+} from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import api from "@/lib/api";
+import { toast } from "sonner";
 
-// ✅ Define type for your recent records
-
-//ALL DATA HERE IS MOCK DATA FOR DEMO PURPOSES ONLY
-//STATIC DATA TO BE REPLACED WITH DYNAMIC DATA FROM BACKEND INTEGRATION
-//ILISAN RANI PUHON IF EVER NAA NA ANG BACKEND INTEGRATION
 interface BorrowRecord {
   id: number;
   studentName: string;
@@ -19,13 +23,33 @@ interface BorrowRecord {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      const result = await api.get('api/admins/verify-admin');
+      try {
+        if (!result.data.success) {
+          toast.error("Login First");
+          router.push('/admin/auth/login');
+        }
+
+      } catch (error: any) {
+        toast.error("Login First");
+        console.log(error);
+        router.push('/admin/auth/login');
+        return;
+      }
+    };
+
+    verifyAdmin();
+  });
+
   const [stats, setStats] = useState({
     totalBooks: 0,
     totalMembers: 0,
     borrowedBooks: 0,
   });
 
-  // ✅ Explicitly type your useState array
   const [recentRecords, setRecentRecords] = useState<BorrowRecord[]>([]);
 
   useEffect(() => {
@@ -126,5 +150,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-

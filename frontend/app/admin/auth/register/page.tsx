@@ -8,7 +8,7 @@ import { User, Mail, Lock, BookOpen } from 'lucide-react';
 import { useAdmin } from '@/app/context/AdminContext';
 import {AlertModal} from '@/components/alert';
 import { ButtonSubmit } from '@/components/button';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'sonner'
 
 export default function SignUpPageAdmin() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function SignUpPageAdmin() {
 
     setSubmitted(true);
     if (password !== confirmPassword) {
-      alert('Passwords do not match.');
+      toast.error('Passwords do not match.');
       setSubmitted(false);
       return;
     }
@@ -61,7 +61,6 @@ export default function SignUpPageAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <ToastContainer position='top-center'/>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">

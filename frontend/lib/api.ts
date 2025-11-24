@@ -28,9 +28,29 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('token');
-      window.location.href = '/admin/auth/login';
+      const shouldSkipRedirect = (() => {
+        const url = error.config?.url || "";
+        const authEndpoints = [
+          "/admins/login",
+          "/admins/register",
+          "/students/login",
+          "/students/register",
+        ];
+        const isAuthRequest = authEndpoints.some((endpoint) =>
+          url.includes(endpoint)
+        );
+
+        const isAuthPage =
+          typeof window !== "undefined" &&
+          window.location.pathname.includes("/auth/");
+
+        return isAuthRequest || isAuthPage;
+      })();
+
+      if (!shouldSkipRedirect) {
+        localStorage.removeItem("token");
+        window.location.href = "/admin/auth/login";
+      }
     }
     return Promise.reject(error);
   }
