@@ -33,6 +33,7 @@ export default function LoginPageAdmin() {
       }
     } catch (error: any) {
       setSubmitted(false);
+      console.log(error);
       toast.error(error.response.data.message || 'Login failed. Please try again.');
     }
   }

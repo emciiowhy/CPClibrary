@@ -2,127 +2,193 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { pool } from "../db.js";
 dotenv.config();
+import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
+
+const getSecret = (primary, fallback) => {
+  const secret = process.env[primary] || process.env[fallback];
+  if (!secret) {
+    throw new Error(`Missing JWT secret: set ${primary} or ${fallback}`);
+  }
+  return secret;
+};
+
+const getAccessSecret = () => getSecret("ACCESS_TOKEN", "MY_SECRET_KEY");
+const getRefreshSecret = () => getSecret("REFRESH_TOKEN", "MY_REFRESH_TOKEN");
 
 export const jwtAuthenticate = (req, res, next) => {
-  const jwtPayload = req.cookies.token; // imong gi kuha ang token gikan sa headers
-  console.log("JWT Payload:", jwtPayload);
-  if (!jwtPayload) {
-    return res.json({ message: "Unauthorized Access" });
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized Access" });
   }
 
-  // const token = jwtPayload.split(" ")[1];
-
-  jwt.verify(jwtPayload, process.env.MY_SECRET_KEY, (err, decoded) => {
-
-    if (err) {
-      return res.json({ message: "Invalid Token" });
-    }
-
-    req.user = decoded; // decode contain the decoded value in token 
-    next();
-
-  });
-}
-
-export const verifyAdminToken = async (req, res, next) => {
   try {
-    const requestToken = req.cookies.token;
-
-    if (!requestToken) {
-      return res.status(401).json({
-        message: "Token not provided",
-        success: false
-      });
-    }
-
-    console.log('token ', requestToken);
-    
-    const decoded = jwt.verify(requestToken, process.env.MY_SECRET_KEY);
-    const getAdmin = await pool.query(`
-        SELECT * FROM admins 
-        WHERE id = $1
-        `, [decoded.id]);
-
-    if (getAdmin.rows.length === 0) {
-      return res.json({
-        message: "Admin not found",
-        success: false
-      });
-    };
-
-    if (getAdmin.rows[0].role != "admin") {
-      return res.json({
-        message: "Unauthorized",
-        authorized: false,
-        success: false
-      })
-    }
-
-    req.user = getAdmin.rows[0];
-    res.json({
-      authorized: true,
-      success: true
-    })
-
+    const decoded = jwt.verify(token, getAccessSecret());
+    req.user = decoded;
     next();
   } catch (error) {
-    console.log("auth middleware error", error.message);
-    res.status(500).json({
-      message: "Error verifying admin token",
-      success: false
-    })
+    return res.status(401).json({ message: "Invalid Token" });
   }
-}
+};
 
-export const verifyStudentToken = async (req, res, next) => {
+export const verifyAdminToken = async (req, res) => {
   try {
+    const token = req.cookies.token;
 
-    const requestToken = req.cookies.token;
-
-    if (!requestToken) {
+    if (!token) {
       return res.status(401).json({
         message: "Token not provided",
-        success: false
-      })
+        success: false,
+      });
     }
 
-    console.log('Token ', requestToken);
-
-    const decoded = jwt.verify(requestToken, process.env.MY_SECRET_KEY);
-    const getStudent = await pool.query(
+    const decoded = jwt.verify(token, getAccessSecret());
+    const adminResult = await pool.query(
       `
-        SELECT * FROM students
-        WHERE email = $1
-      `, [decoded.id]
+        SELECT id, name, email, role
+        FROM admins 
+        WHERE id = $1
+      `,
+      [decoded.id]
     );
 
-    if (getStudent.rows.length === 0) {
-      return res.json({
-        message: "Student not found",
-        success: false
-      })
+    const admin = adminResult.rows[0];
+    if (!admin) {
+      return res.status(404).json({
+        message: "Admin not found",
+        success: false,
+      });
     }
 
-    if (getStudent.rows[0].role !== "student") {
-      return res.json({
+    if (admin.role !== "admin") {
+      return res.status(403).json({
         message: "Unauthorized",
         authorized: false,
-        success: false
-      })
+        success: false,
+      });
     }
 
-    req.user = getStudent.rows[0];
-    res.status({
+    return res.json({
+      message: "Authorized",
       authorized: true,
-      success: true
-    })
+      success: true,
+      admin,
+    });
+  } catch (error) {
+    console.log("auth middleware error", error.message);
+    const statusCode =
+      error.name === "TokenExpiredError" || error.name === "JsonWebTokenError"
+        ? 401
+        : 500;
+    return res.status(statusCode).json({
+      message:
+        statusCode === 401 ? "Invalid or expired token" : "Error verifying admin token",
+      success: false,
+    });
+  }
+};
 
-    next();
+export const verifyStudentToken = async (req, res) => {
+  try {
+    const token = req.cookies.token;
 
+    if (!token) {
+      return res.status(401).json({
+        message: "Token not provided",
+        success: false,
+      });
+    }
+
+    const decoded = jwt.verify(token, getAccessSecret());
+    const studentResult = await pool.query(
+      `
+        SELECT id, name, email, role
+        FROM students
+        WHERE id = $1
+      `,
+      [decoded.id]
+    );
+
+    const student = studentResult.rows[0];
+    if (!student) {
+      return res.status(404).json({
+        message: "Student not found",
+        success: false,
+      });
+    }
+
+    if (student.role !== "student") {
+      return res.status(403).json({
+        message: "Unauthorized",
+        authorized: false,
+        success: false,
+      });
+    }
+
+    return res.json({
+      message: "Authorized",
+      authorized: true,
+      success: true,
+      student,
+    });
+  } catch (error) {
+    const statusCode =
+      error.name === "TokenExpiredError" || error.name === "JsonWebTokenError"
+        ? 401
+        : 500;
+    return res.status(statusCode).json({
+      message:
+        statusCode === 401 ? "Invalid or expired token" : "Error verifying student token",
+      success: false,
+    });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({
+      message: "Refresh token missing",
+      success: false,
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, getRefreshSecret());
+
+    let result;
+    if (decoded.role === "admin") {
+      result = await pool.query("SELECT * FROM admins WHERE id = $1", [decoded.id]);
+    } else if (decoded.role === "student") {
+      result = await pool.query("SELECT * FROM students WHERE id = $1", [decoded.id]);
+    } else {
+      return res.status(403).json({
+        message: "Invalid role",
+        success: false,
+      });
+    }
+
+    if (!result.rows[0]) {
+      return res.status(403).json({
+        message: "Invalid refresh token",
+        success: false,
+      });
+    }
+
+    const newAccessToken = generateAccessToken({ id: decoded.id, role: decoded.role });
+
+    res.cookie("token", newAccessToken, {
+      httpOnly: true,
+      maxAge: 5 * 60 * 1000,
+    });
+
+    res.json({
+      message: "Access token refreshed",
+      success: true,
+    });
   } catch (error) {
     return res.status(500).json({
-      message: "Error verifying student token",
-      success: false
-    })
+      message: "Refresh token invalid or expired",
+      success: false,
+    });
   }
-}
+};

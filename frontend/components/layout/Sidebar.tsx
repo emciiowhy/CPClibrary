@@ -26,10 +26,18 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
     try {
       const result = await api.get('/api/admins/logout');
       if (result.data.success) {
-        toast.success("Logout Successfully goku");
-        router.push('/admin/auth/login');
+        toast.success("Logout Successfully");
+
+        if (result.data.role === "admin") {
+          router.push('/admin/auth/login');
+          return;
+        }
+
+        if (result.data.role === "student") {
+          router.push('/students/auth/login');
+        }   
       }
-      
+
     } catch (error: any) {
       toast.error(error.response.data.message + "error");
       console.log(error);

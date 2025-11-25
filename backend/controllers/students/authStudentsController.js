@@ -6,6 +6,7 @@ dotenv.config();
 import nodemailer from "nodemailer";
 import { generateOTP } from "../../utils/otpGenerator.js";
 import { pool } from "../../db.js";
+import { generateAccessToken } from "../../utils/jwt.js";
 
 export const fetchStudents = async (req, res) => {
   try {
@@ -31,20 +32,27 @@ export const loginStudentController = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({message: "Invalid password", success: false});
 
-    const token = jwt.sign(
-      {id: user.id, email: user.email, schoolId: user.student_id},
-      process.env.MY_SECRET_KEY,
-      {expiresIn: "1hr"}
-    );
+    // const token = jwt.sign(
+    //   {id: user.id, email: user.email, schoolId: user.student_id, role: user.role},
+    //   process.env.MY_SECRET_KEY,
+    //   {expiresIn: "1hr"}
+    // );
+
+    const token = generateAccessToken({
+      id: user.id, 
+      email: user.email, 
+      schoolId: user.student_id, 
+      role: user.role,
+    });
 
      res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'development', // Only send over HTTPS in production
+        // secure: process.env.NODE_ENV === 'development', // Only send over HTTPS in production
         sameSite: 'Lax',
-        maxAge: 60 * 60 * 1000 // 1 hour in milliseconds
+        maxAge: 5 * 60 * 1000
     })
 
-    res.setHeader('Authorization', `Bearer ${token}`);  
+    // res.setHeader('Authorization', `Bearer ${token}`);  
     
     res.json({
       message: "Login Successfully",
@@ -55,6 +63,7 @@ export const loginStudentController = async (req, res) => {
         name: user.name,
         schoolId: user.student_id,
         email: user.email,
+        role: user.role,
       }
     });
 
@@ -348,5 +357,30 @@ export const resetPasswordStudentsController = async (req, res) => {
       error: error.message,
       success: false
     });
+  }
+}
+
+export const logoutStudent = async (req, res) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 0,
+      path: "/",
+    });
+
+    res.status(200).json({
+      message: "Logged out successfully!",
+      success: true,
+      role: "student",
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Logout failed",
+      error: error.message,
+      success: false
+    })
   }
 }

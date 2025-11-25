@@ -7,6 +7,7 @@ dotenv.config();
 import nodemailer from "nodemailer";
 import { generateOTP } from "../../utils/otpGenerator.js";
 import { pool } from "../../db.js";
+import { generateAccessToken } from "../../utils/jwt.js";
 
 export const fetchAdmins = async (req, res) => {
   try {
@@ -33,18 +34,24 @@ export const loginAdminController = async (req, res) => {
       success: false
     });
 
-    const token = jwt.sign(
-      { id: admin.id, email: admin.email },
-      process.env.MY_SECRET_KEY,
-      { expiresIn: "1hr" }
-    );
+    // const token = jwt.sign(
+    //   { id: admin.id, email: admin.email, role: admin.role },
+    //   process.env.MY_SECRET_KEY,
+    //   { expiresIn: "1hr" }
+    // );
+
+    const token = generateAccessToken({
+      id: admin.id, 
+      email: admin.email, 
+      role: admin.role
+    })
 
     res.cookie("token", token, {
       httpOnly: true,
       // secure: process.env.NODE_ENV === "development", // Only send over HTTPS in production
       secure: false,
       sameSite: "Lax",
-      maxAge: 60 * 60 * 1000, // 1 hour in milliseconds
+      maxAge: 5 * 60 * 1000,
     });
 
     res.json({
@@ -55,6 +62,7 @@ export const loginAdminController = async (req, res) => {
         id: admin.id,
         name: admin.name,
         email: admin.email,
+        role: admin.role,
       },
     });
     
@@ -329,11 +337,12 @@ export const logoutAdmin = async (req, res) => {
     res.status(200).json({
       message: "Logged out successfully!",
       success: true,
+      role: "admin"
     });
 
   } catch (error) {
     return res.status(500).json({
-      message: "Logout Failed",
+      message: "Logout failed",
       error: error.message,
       success: false,
     });

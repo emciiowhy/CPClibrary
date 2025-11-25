@@ -26,15 +26,16 @@ export default function DashboardPage() {
   const router = useRouter();
   useEffect(() => {
     const verifyAdmin = async () => {
-      const result = await api.get('api/admins/verify-admin');
       try {
+        const result = await api.get('api/admins/verify-admin');
         if (!result.data.success) {
           toast.error("Login First");
+          console.log("error ari sa if");
           router.push('/admin/auth/login');
         }
 
       } catch (error: any) {
-        toast.error("Login First");
+        toast.error(error.response.data.message);
         console.log(error);
         router.push('/admin/auth/login');
         return;

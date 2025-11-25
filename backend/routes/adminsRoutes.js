@@ -1,6 +1,6 @@
 import express from 'express';
 import { finalRegisterAdminController, loginAdminController, registerAdminRequestController, verifyAdminOtpController, fetchAdmins, forgotPasswordAdminController, resetPasswordAdminController, logoutAdmin } from '../controllers/admins/authAdminsController.js';
-import { jwtAuthenticate, verifyAdminToken } from '../middleware/authMiddleware.js';
+import { jwtAuthenticate, verifyAdminToken, refreshToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
