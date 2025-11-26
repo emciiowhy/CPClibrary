@@ -16,7 +16,7 @@ const getAccessSecret = () => getSecret("ACCESS_TOKEN", "MY_SECRET_KEY");
 const getRefreshSecret = () => getSecret("REFRESH_TOKEN", "MY_REFRESH_TOKEN");
 
 export const jwtAuthenticate = (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.cookies.access_token;
   if (!token) {
     return res.status(401).json({ message: "Unauthorized Access" });
   }
@@ -26,13 +26,16 @@ export const jwtAuthenticate = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid Token" });
+    return res.status(401).json({ 
+      message: "Invalid Token",
+      success: false,
+    });
   }
 };
 
 export const verifyAdminToken = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.access_token;
 
     if (!token) {
       return res.status(401).json({
@@ -89,7 +92,7 @@ export const verifyAdminToken = async (req, res) => {
 
 export const verifyStudentToken = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.access_token;
 
     if (!token) {
       return res.status(401).json({
@@ -144,7 +147,7 @@ export const verifyStudentToken = async (req, res) => {
 };
 
 export const refreshToken = async (req, res) => {
-  const token = req.cookies.token;
+  const token = req.cookies.refresh_token;
   if (!token) {
     return res.status(401).json({
       message: "Refresh token missing",
@@ -174,10 +177,15 @@ export const refreshToken = async (req, res) => {
       });
     }
 
-    const newAccessToken = generateAccessToken({ id: decoded.id, role: decoded.role });
+    const newAccessToken = generateAccessToken({ 
+      id: decoded.id, 
+      role: decoded.role 
+    });
 
-    res.cookie("token", newAccessToken, {
+    res.cookie("access_token", newAccessToken, {
       httpOnly: true,
+      sameSite: "Lax",
+      secure: false,
       maxAge: 5 * 60 * 1000,
     });
 
@@ -185,6 +193,9 @@ export const refreshToken = async (req, res) => {
       message: "Access token refreshed",
       success: true,
     });
+
+    console.log("Access token refreshed");
+
   } catch (error) {
     return res.status(500).json({
       message: "Refresh token invalid or expired",

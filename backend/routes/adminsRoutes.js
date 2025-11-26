@@ -1,5 +1,5 @@
 import express from 'express';
-import { finalRegisterAdminController, loginAdminController, registerAdminRequestController, verifyAdminOtpController, fetchAdmins, forgotPasswordAdminController, resetPasswordAdminController, logoutAdmin } from '../controllers/admins/authAdminsController.js';
+import { finalRegisterAdminController, loginAdminController, registerAdminRequestController, verifyAdminOtpController, fetchAdmins, forgotPasswordAdminController, resetPasswordAdminController, logoutAdmin, getAdminRole } from '../controllers/admins/authAdminsController.js';
 import { jwtAuthenticate, verifyAdminToken, refreshToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -15,5 +15,6 @@ router.post('/admins/reset-password', resetPasswordAdminController);
 
 router.get('/admins/verify-admin', verifyAdminToken);
 router.get('/admins/logout', logoutAdmin);
+router.get('/admins/get-info', getAdminRole);
 
 export default router;

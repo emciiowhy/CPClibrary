@@ -26,7 +26,7 @@ export default function LoginPageAdmin() {
       const result = await api.post('/api/admins/login', {email, password});
       if (result.data.success) {
         const name = result.data.admin.name;
-        setAdminData({name: name, email: email});
+        setAdminData({name: name, email: email, role: result.data.admin.role});
 
         toast.success('Login successful! Redirecting to dashboard...');
           router.push('/admin/dashboard');

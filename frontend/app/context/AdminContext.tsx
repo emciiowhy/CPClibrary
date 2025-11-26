@@ -6,6 +6,7 @@ type AdminData = {
   name: string;
   email: string;
   password: string;
+  role: string
 };
 
 type AdminContextType = {
@@ -21,6 +22,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     name: "",
     email: "",
     password: "",
+    role: ""
   });
 
   const setAdminData = (data: Partial<AdminData>) => {
@@ -32,6 +34,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       name: "",
       email: "",
       password: "",
+      role: ""
     });
   };
 

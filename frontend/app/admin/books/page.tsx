@@ -1,13 +1,13 @@
 "use client";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
+import Sidebar from "@/components/layout/admin/SidebarAdmin";
+import Header from "@/components/layout/admin/HeaderAdmin";
 import { button, data, div, image } from "framer-motion/client";
 import React, { useEffect, useState } from "react";
-import IntComSciBook from "@/app/books/images/IntComSciBook.jpg";
-import DatabaseManagementBook from "@/app/books/images/DatabaseManagementSystem.png";
-import IntroductionToTourismAndHospitalityInBC from "@/app/books/images/IntroductionToTourismAndHospitalityinBC.jpg";
-import PrincipleOfTeaching1 from "@/app/books/images/PrincipleOfTeaching1.jpg";
-import PrincipleOfTeaching2 from "@/app/books/images/PrincipleOfTeaching2.jpg";
+import IntComSciBook from "@/app/admin/books/images/IntComSciBook.jpg";
+import DatabaseManagementBook from "@/app/admin/books/images/DatabaseManagementSystem.png";
+import IntroductionToTourismAndHospitalityInBC from "@/app/admin/books/images/IntroductionToTourismAndHospitalityinBC.jpg";
+import PrincipleOfTeaching1 from "@/app/admin/books/images/PrincipleOfTeaching1.jpg";
+import PrincipleOfTeaching2 from "@/app/admin/books/images/PrincipleOfTeaching2.jpg";
 import { ChevronRight, Search, PanelRightClose } from "lucide-react";
 import BookCard from "@/components/books/BookCard";
 

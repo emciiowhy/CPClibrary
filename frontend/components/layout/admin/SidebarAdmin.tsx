@@ -2,13 +2,13 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { BookOpen, BookPlus, Home, Book, Users, Clock, LogOut, ChevronLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Cpc from '@/../public/cpc-logo.png';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import { ButtonSubmit } from '../button';
+import { ButtonSubmit } from '../../button';
 
-export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
+export default function SidebarAdmin(props: { onClickBtnOpenSideBar: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -27,15 +27,7 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
       const result = await api.get('/api/admins/logout');
       if (result.data.success) {
         toast.success("Logout Successfully");
-
-        if (result.data.role === "admin") {
-          router.push('/admin/auth/login');
-          return;
-        }
-
-        if (result.data.role === "student") {
-          router.push('/students/auth/login');
-        }   
+        router.push('/admin/auth/login');
       }
 
     } catch (error: any) {
@@ -99,21 +91,13 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
               <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
               <div className="grid grid-cols-2 space-x-4">
                 <button
-                  onClick={() => setShowLogoutModal(false)}
+                  onClick={() => {
+                    setShowLogoutModal(false);
+                  }}
                   className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300"
                 >
                   Cancel
                 </button>
-
-                {/* <ButtonSubmit props={{
-                  buttonType="button",
-                  className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700",
-                  submitted={submitted},
-                  btnText="Logout",
-                  btnLoadingText="Logging out",
-                  btnOnClick={handleLogout},
-                }}
-                /> */}
 
                 <ButtonSubmit props={{
                   submitted: submitted,

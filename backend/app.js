@@ -4,6 +4,7 @@ import morgan from "morgan";
 import studentsRoutes from './routes/studentsRoutes.js';
 import adminsRoutes from './routes/adminsRoutes.js'
 import booksRoutes from './routes/booksRoutes.js'
+import authRoutes from './routes/authRoutes.js'
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -22,5 +23,6 @@ app.get('/', (req, res) => {
 
 app.use('/api', studentsRoutes);
 app.use('/api', adminsRoutes, booksRoutes);
+app.use('/api', authRoutes);
 
 export default app;

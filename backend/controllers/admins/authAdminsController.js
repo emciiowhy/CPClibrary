@@ -1,13 +1,13 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { findAdminsByEmail, findStudentsByEmail } from "../../models/authModel.js";
+import { findAdminsByEmail, findStudentsByEmail, findAdminsById } from "../../models/authModel.js";
 import { getAllAdmins } from "../../models/adminsModel.js";
 import dotenv from "dotenv";
 dotenv.config();
 import nodemailer from "nodemailer";
 import { generateOTP } from "../../utils/otpGenerator.js";
 import { pool } from "../../db.js";
-import { generateAccessToken } from "../../utils/jwt.js";
+import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
 
 export const fetchAdmins = async (req, res) => {
   try {
@@ -34,19 +34,20 @@ export const loginAdminController = async (req, res) => {
       success: false
     });
 
-    // const token = jwt.sign(
-    //   { id: admin.id, email: admin.email, role: admin.role },
-    //   process.env.MY_SECRET_KEY,
-    //   { expiresIn: "1hr" }
-    // );
 
-    const token = generateAccessToken({
+    const accessToken = generateAccessToken({
       id: admin.id, 
       email: admin.email, 
       role: admin.role
     })
 
-    res.cookie("token", token, {
+    const refreshToken = generateRefreshToken({
+      id: admin.id,
+      email: admin.email,
+      role: admin.role
+    })
+
+    res.cookie("access_token", accessToken, {
       httpOnly: true,
       // secure: process.env.NODE_ENV === "development", // Only send over HTTPS in production
       secure: false,
@@ -54,9 +55,15 @@ export const loginAdminController = async (req, res) => {
       maxAge: 5 * 60 * 1000,
     });
 
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+
     res.json({
       message: "Login Successfully",
-      token,
       success: true,
       admin: {
         id: admin.id,
@@ -67,7 +74,11 @@ export const loginAdminController = async (req, res) => {
     });
     
   } catch (error) {
-    res.status(500).json({ message: "Login error", error: error.message });
+    res.status(500).json({ 
+      message: "Login error", 
+      error: error.message,
+      success: false
+     });
   }
 };
 
@@ -326,13 +337,21 @@ export const resetPasswordAdminController = async (req, res) => {
 
 export const logoutAdmin = async (req, res) => {
   try {
-    res.cookie("token", "", {
+    res.cookie("access_token", "", {
       httpOnly: true,
       secure: false,
       sameSite: "Lax",
       maxAge: 0,
       path: "/",
     });
+
+    res.cookie("refresh_token", "", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 0,
+      path: "/",
+    })
 
     res.status(200).json({
       message: "Logged out successfully!",
@@ -346,5 +365,37 @@ export const logoutAdmin = async (req, res) => {
       error: error.message,
       success: false,
     });
+  }
+}
+
+export const getAdminRole = async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({
+      message: "User not found",
+      success: false
+    });
+  };
+
+  try {
+    const admin = await findAdminsById(user.id);
+    if (!admin) {
+      return res.status(401).json({
+        message: "Admin based on Id not found",
+        success: false,
+      });
+    };
+
+    res.status(200).json({
+      message: "Admin has been found",
+      success: true,
+      admin,
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to get admin role",
+      success: false
+    })
   }
 }

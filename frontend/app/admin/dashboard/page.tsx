@@ -9,8 +9,8 @@ import {
   ChevronRight,
   PanelRightClose,
 } from "lucide-react";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
+import Sidebar from "@/components/layout/admin/SidebarAdmin";
+import Header from "@/components/layout/admin/HeaderAdmin";
 import api from "@/lib/api";
 import { toast } from "sonner";
 

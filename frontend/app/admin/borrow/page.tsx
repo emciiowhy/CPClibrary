@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
+import Sidebar from "@/components/layout/admin/SidebarAdmin";
+import Header from "@/components/layout/admin/HeaderAdmin";
 import { ChevronRight } from "lucide-react";
 
 interface BorrowedHistory {
