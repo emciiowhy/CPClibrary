@@ -14,6 +14,8 @@ import {
 import { useState } from "react";
 import { button, div } from "framer-motion/client";
 import Cpc from '@/../public/cpc-logo.png';
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 export default function Header() {
   const router = useRouter();
@@ -28,8 +30,18 @@ export default function Header() {
     { path: "/admin/borrow", icon: Clock, label: "Borrow Records" },
   ];
 
-  const handleLogout = () => {
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      const result = await api.get("/api/admins/logout");
+      if (result.data.success) {
+        toast.success("Logout Successfully");
+        router.push("/admin/auth/login");
+      }
+    } catch (error: any) {
+      toast.error(error.response.data.message + "error");
+      console.log(error);
+      return;
+    }
   };
 
   const [open, setOpen] = useState(false);
@@ -71,7 +83,7 @@ export default function Header() {
               <div className="bottom-6">
                     <button
                         onClick={() => setShowLogoutModal(true)}
-                        className="text-xs flex justify-start w-full items-center space-x-3 px-4 py-3 text-red-600"
+                        className="text-xs flex justify-start w-full items-center space-x-1 px-4 py-3 text-red-600"
                     >
                         <LogOut className="w-5 h-5" />
                         <span>Logout</span>

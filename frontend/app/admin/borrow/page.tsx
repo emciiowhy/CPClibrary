@@ -1,34 +1,41 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/admin/SidebarAdmin";
 import Header from "@/components/layout/admin/HeaderAdmin";
 import { ChevronRight } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 interface BorrowedHistory {
-  name: string,
-  studentId: string,
-  bookBorrowed: string,
-  date: string,
-  dueDate: string,
-  status: string,
+  borrow_id: number;
+  borrow_code: string;
+  borrow_date: string;
+  due_date: string;
+  status: string;
+  student_name: string;
+  student_school_id: string;
+  book_title: string;
+  book_author: string;
 }
 
 export default function BorrowBookPage() {
   const [openSideBar, setOpenSideBar] = React.useState(true);
-
-  const [borrowedBook, setBorrowedBook] = React.useState<BorrowedHistory[]>([]);
+  const [borrowedHistory, setBorrowedHistory] = useState<BorrowedHistory[]>([]);
 
   useEffect(() => {
-    setBorrowedBook([
-    {
-      name: "Jerson Jay",
-      studentId: "20240891",
-      bookBorrowed: "BASTA LIBRO",
-      date: "10-02-25",
-      dueDate: "12-21-25",
-      status: "borrowed"
-    },
-    ])
+    const getBorrowed = async () => {
+      try {
+        const response = await api.get('/api/borrowed');
+
+        setBorrowedHistory(response.data.data);
+      } catch (error) {
+        toast.error("Error in getting all borrowed history");
+        console.log(error);
+        return;
+      }
+    }
+
+    getBorrowed();
   }, [])
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -64,17 +71,18 @@ export default function BorrowBookPage() {
             </div>
 
             <div className="divide-y">
-              { borrowedBook
+              { borrowedHistory
                 .slice(0, 4)
-                .map((book) => (
+                .map((book, i) => (
                   <div
+                    key={i}
                     className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
                   >
-                    <div>{book.name}</div>
-                    <div>{book.studentId}</div>
-                    <div>{book.bookBorrowed}</div>
-                    <div>{book.date}</div>
-                    <div>{book.dueDate}</div>
+                    <div>{book.student_name}</div>
+                    <div>{book.student_school_id}</div>
+                    <div>{book.book_title}</div>
+                    <div>{new Date(book.borrow_date).toLocaleDateString()}</div>
+                    <div>{new Date(book.due_date).toLocaleDateString()}</div>
                     <div>{book.status}</div>
                   </div>
                 ))}

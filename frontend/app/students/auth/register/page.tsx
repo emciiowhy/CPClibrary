@@ -15,6 +15,7 @@ export default function SignUpPage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [schoolId, setSchoolId] = useState('');
+  const [course, setCourse] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,7 +32,7 @@ export default function SignUpPage() {
     }
 
     try {
-      const response = await api.post('api/students/register/request', {name, schoolId, email, password});
+      const response = await api.post('api/students/register/request', {name, schoolId, email, password, course});
       if (response.data.success) {
         toast.success(response.data.message || "Registration successful! Please check your email for OTP.");
 
@@ -40,6 +41,7 @@ export default function SignUpPage() {
           schoolId: schoolId,
           email: email,
           password: password,
+          course: course,
         })
 
         router.push('/students/auth/register/verify-otp');
@@ -109,6 +111,27 @@ export default function SignUpPage() {
                   setSchoolId(e.target.value);
                 }}
               />
+            </div>
+          </div>
+          
+          {/* Course */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Course</label>
+            <div className="relative">
+              <BookOpen className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+
+              <select
+                className="text-gray-400 w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                value={course}
+                onChange={(e) => setCourse(e.target.value)}
+                required
+              >
+                <option hidden>Select</option>
+                <option value="BSIT" className='text-blue-500'>BSIT</option>
+                <option value="BEED" className='text-blue-500'>BEED</option>
+                <option value="BSED" className='text-blue-500'>BSED</option>
+                <option value="BSHM" className='text-blue-500'>BSHM</option>
+              </select>
             </div>
           </div>
 

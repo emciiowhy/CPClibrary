@@ -1,20 +1,11 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Home,
-  Book,
-  Users,
-  Plus,
-  Clock,
-  LogOut,
-  Menu,
-  History,
-} from "lucide-react";
+import { Home, Book, LogOut, Menu, Search, UserCircle } from "lucide-react";
 import { useState } from "react";
-import { button, div } from "framer-motion/client";
 import Cpc from '@/../public/cpc-logo.png';
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 export default function Header() {
   const router = useRouter();
@@ -22,14 +13,24 @@ export default function Header() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
-    { path: "/admin/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/admin/books", icon: Book, label: "Browse Books" },
-    { path: "/admin/members", icon: Book, label: "Borrowed Books" },
-    { path: "/admin/books/add", icon: History, label: "History" },
+    { path: "/students/profile", icon: UserCircle, label: "Profile" },
+    { path: "/students/dashboard", icon: Home, label: "Dashboard" },
+    { path: "/students/browse-books", icon: Search, label: "Browse Books" },
+    { path: "/students/borrowed-books", icon: Book, label: "Borrowed Books" },
   ];
 
-  const handleLogout = () => {
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      const result = await api.get("/api/students/logout");
+      if (result.data.success) {
+        toast.success("Logout Successfully");
+        router.push("/students/auth/login");
+      }
+    } catch (error: any) {
+      toast.error(error.response.data.message + "error");
+      console.log(error);
+      return;
+    }
   };
 
   const [open, setOpen] = useState(false);
@@ -68,10 +69,10 @@ export default function Header() {
                 </button>
               ))}
 
-              <div className="bottom-6">
+              <div className="bottom-6 w-full">
                     <button
                         onClick={() => setShowLogoutModal(true)}
-                        className="text-xs flex justify-start w-full items-center space-x-3 px-4 py-3 text-red-600"
+                        className="text-xs flex justify-start w-full items-center space-x-3 px-1 py-3 text-red-600"
                     >
                         <LogOut className="w-5 h-5" />
                         <span>Logout</span>

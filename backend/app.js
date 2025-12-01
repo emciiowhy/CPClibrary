@@ -11,18 +11,19 @@ const app = express();
 
 app.use(express.json());
 app.use(morgan("dev"));
-app.use(cookieParser());
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true,
 }));
+app.use(cookieParser());
 
 app.get('/', (req, res) => {
   res("hi");
 })
 
 app.use('/api', studentsRoutes);
-app.use('/api', adminsRoutes, booksRoutes);
+app.use('/api', adminsRoutes);
+app.use('/api', booksRoutes);
 app.use('/api', authRoutes);
 
 export default app;

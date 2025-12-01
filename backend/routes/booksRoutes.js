@@ -1,8 +1,15 @@
 import express from 'express';
-import { fetchBooks } from '../controllers/books/booksController.js';
+import { addBook, borrowBook, fetchBooks, getAllBorrowed, getMyBorrowed } from '../controllers/books/authBooksController.js';
+import { jwtAuthenticate } from '../middleware/authMiddleware.js';
+import { uploadBook } from '../utils/cloudinary.js';
 
 const router = express.Router();
 
-router.get('/books', fetchBooks);
+router.get('/books',jwtAuthenticate, fetchBooks);
+router.get('/borrowed',jwtAuthenticate, getAllBorrowed);
+router.get('/books/my-borrowed', jwtAuthenticate, getMyBorrowed);
+
+router.post('/books/add', uploadBook.single("image"), addBook);
+router.post('/books/borrow', borrowBook);
 
 export default router;

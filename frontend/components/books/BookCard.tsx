@@ -6,6 +6,9 @@ interface BookCardProps {
   bookDescription: string;
   bookImages: string;
   bookAuthor: string;
+  bookCourse: string;
+  bookStatus: boolean;
+  bookYear: string;
 }
 
 export default function BookCard(props: BookCardProps) {
@@ -14,7 +17,7 @@ export default function BookCard(props: BookCardProps) {
       <div className="hidden md:block">
         <div
           key={props.bookId}
-          className="grid grid-cols-4 gap-4 p-2 border-b hover:bg-gray-50"
+          className="grid grid-cols-6 gap-4 p-2 border-b hover:bg-gray-50 cursor-pointer"
         >
           <div className="flex items-center">
             <img
@@ -27,9 +30,11 @@ export default function BookCard(props: BookCardProps) {
             {props.bookTitle}
           </div>
           <div className="flex items-center text-sm text-gray-600">
-            {props.bookDescription}
+            {props.bookAuthor}
           </div>
-          <div className="flex items-center text-sm">{props.bookAuthor}</div>
+          <div className="flex items-center text-sm">{props.bookCourse}</div>
+          <div className="flex items-center text-sm">{props.bookYear}</div>
+          <div className={`font-semibold flex items-center text-sm ${props.bookStatus ? "text-green-600" : "text-red-600"}`}>{props.bookStatus ? "Available" : "Not Available"}</div>
         </div>
       </div>
 
@@ -50,14 +55,20 @@ export default function BookCard(props: BookCardProps) {
         <div>
           <h3 className="font-semibold text-sm line-clamp-2 mb-1">
             {props.bookTitle}
-          </h3>
-          <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-            {props.bookDescription}
-          </p>
-        </div>
-        <p className="text-xs font-medium text-blue-600">
+          </h3>       
+          <p className="text-xs font-medium text-blue-600">
           by {props.bookAuthor}
+         </p>
+         <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+            {props.bookCourse}
         </p>
+        <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+            {props.bookYear}
+        </p>
+        <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+            {props.bookStatus}
+        </p>
+        </div>
       </div>
     </div>
       </div>

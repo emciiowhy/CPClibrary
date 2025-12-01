@@ -1,17 +1,19 @@
 "use client";
-import Sidebar from "@/components/layout/admin/SidebarAdmin";
-import Header from "@/components/layout/admin/HeaderAdmin";
-import React, { useEffect, useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Search, PanelRightClose } from "lucide-react";
 import IntComSciBook from "@/app/admin/books/images/IntComSciBook.jpg";
 import DatabaseManagementBook from "@/app/admin/books/images/DatabaseManagementSystem.png";
 import IntroductionToTourismAndHospitalityInBC from "@/app/admin/books/images/IntroductionToTourismAndHospitalityinBC.jpg";
 import PrincipleOfTeaching1 from "@/app/admin/books/images/PrincipleOfTeaching1.jpg";
 import PrincipleOfTeaching2 from "@/app/admin/books/images/PrincipleOfTeaching2.jpg";
-import { Search, PanelRightClose } from "lucide-react";
-import BookCard from "@/components/books/BookCard";
-import { toast } from "sonner";
+import Sidebar from "@/components/layout/students/SidebarStudent";
+import Header from "@/components/layout/students/HeaderStudent";
 import api from "@/lib/api";
-import { ButtonSubmit } from "@/components/button";
+import { toast } from "sonner";
+import { StatsCardModal } from "@/components/dashboard/StatsCard";
+import BookCard from "@/components/books/BookCard";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import BookCardModal from "@/components/books/BookCardModal"
 
@@ -21,15 +23,18 @@ interface BookType {
   description: string;
   cover_image_url: string;
   author: string;
+  courseCategory: string;
+  year: string;
+  available: boolean;
   course: string;
-  available: boolean,
-  year: string
+  due_date: Date;
+  copies: number;
 }
 
-const Books = () => {
+export default function BrowseBook() {
+  const router = useRouter();
+  const [openSideBar, setOpenSideBar] = useState(true);
   const [books, setBooks] = React.useState<BookType[]>([]);
-  const [openSideBar, setOpenSideBar] = React.useState(true);
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     const getBooks = async () => {
@@ -39,7 +44,7 @@ const Books = () => {
         setBooks(response.data);
       } catch (error) {
         toast.error("Error in getting books");
-        console.log("Error getting books " + error);
+        console.log("Error in getting books " + error);
         return;
       }
     }
@@ -47,7 +52,22 @@ const Books = () => {
     getBooks();
   }, []);
 
-  const [bookLimitMap, setBookLimitMap] = useState(5);
+  const handleBorrowBook = async (bookId: number, bookDueDate: Date) => {
+    try {
+      const result = await api.post('/api/books/borrow', {
+        book_id: bookId, 
+        due_date: bookDueDate.toISOString(),
+      });
+
+      window.location.reload();
+      toast.success(result.data.message);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Borrow failed");
+      console.log(error);
+    }
+  }
+
+  const bookLimitMap = 5;
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -57,14 +77,14 @@ const Books = () => {
       )}
 
       <main className="flex-1 flex flex-col p-6 bg-gray-100 overflow-y-auto gap-2">
-        <div className="flex justify-center items-center flex-row w-fit gap-3 mb-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-indigo-800">Browse Books</h1>
           {!openSideBar && (
             <PanelRightClose
-              className="w-6 h-6 hover:cursor-pointer hidden md:block"
+              className="w-6 h-6 text-indigo-700 cursor-pointer hidden md:block"
               onClick={() => setOpenSideBar(!openSideBar)}
             />
           )}
-          <h1 className="text-2xl font-bold">Browse Book</h1>
         </div>
 
         {/* SEARCH BOOK */}
@@ -158,8 +178,9 @@ const Books = () => {
                       author={book.author} 
                       year={book.year}
                       description={book.description}
-                      copies={25}
-                      user="admin"
+                      copies={book.copies}
+                      user="student"
+                      onClickBtn={() => handleBorrowBook(book.id, book.due_date || new Date())}
                     />
                   </Dialog>
                 ))}
@@ -170,8 +191,4 @@ const Books = () => {
       </main>
     </div>
   );
-};
-
-export default Books;
-
-
+}

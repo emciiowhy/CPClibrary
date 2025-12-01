@@ -16,15 +16,25 @@ const getAccessSecret = () => getSecret("ACCESS_TOKEN", "MY_SECRET_KEY");
 const getRefreshSecret = () => getSecret("REFRESH_TOKEN", "MY_REFRESH_TOKEN");
 
 export const jwtAuthenticate = (req, res, next) => {
-  const token = req.cookies.access_token;
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized Access" });
+  const access_token = req.cookies.access_token;
+  const refresh_token = req.cookies.refresh_token;
+
+  if (!access_token && !refresh_token) {
+    return res.status(401).json({ 
+      message: "Unauthorized Access",
+    });
   }
 
   try {
-    const decoded = jwt.verify(token, getAccessSecret());
-    req.user = decoded;
-    next();
+    if (access_token) {
+      const decoded = jwt.verify(access_token, getAccessSecret());
+      req.user = decoded;
+      next();
+    } else {
+      const decoded = jwt.verify(refresh_token, getRefreshSecret());
+      req.user = decoded;
+      next();
+    }
   } catch (error) {
     return res.status(401).json({ 
       message: "Invalid Token",
@@ -34,17 +44,17 @@ export const jwtAuthenticate = (req, res, next) => {
 };
 
 export const verifyAdminToken = async (req, res) => {
+  const access_token = req.cookies.access_token;
+  const refresh_token = req.cookies.refresh_token;
+
+  if (!access_token && !refresh_token) {
+    return res.status(401).json({ 
+      message: "Unauthorized Access",
+    });
+  }
+
   try {
-    const token = req.cookies.access_token;
-
-    if (!token) {
-      return res.status(401).json({
-        message: "Token not provided",
-        success: false,
-      });
-    }
-
-    const decoded = jwt.verify(token, getAccessSecret());
+    const decoded = jwt.verify(access_token, getAccessSecret());
     const adminResult = await pool.query(
       `
         SELECT id, name, email, role
@@ -55,17 +65,19 @@ export const verifyAdminToken = async (req, res) => {
     );
 
     const admin = adminResult.rows[0];
-    if (!admin) {
-      return res.status(404).json({
-        message: "Admin not found",
-        success: false,
-      });
-    }
-
+    //if not admin
     if (admin.role !== "admin") {
       return res.status(403).json({
         message: "Unauthorized",
         authorized: false,
+        success: false,
+      });
+    }
+
+    //if can't find admin in the db
+    if (!admin) {
+      return res.status(404).json({
+        message: "Admin not found",
         success: false,
       });
     }
@@ -83,8 +95,7 @@ export const verifyAdminToken = async (req, res) => {
         ? 401
         : 500;
     return res.status(statusCode).json({
-      message:
-        statusCode === 401 ? "Invalid or expired token" : "Error verifying admin token",
+      message: statusCode === 401 ? "Invalid or expired token" : "Error verifying admin token",
       success: false,
     });
   }

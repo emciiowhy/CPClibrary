@@ -2,8 +2,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { findAdminsByEmail, findStudentsByEmail, findAdminsById } from "../../models/authModel.js";
 import { getAllAdmins } from "../../models/adminsModel.js";
-import dotenv from "dotenv";
-dotenv.config();
 import nodemailer from "nodemailer";
 import { generateOTP } from "../../utils/otpGenerator.js";
 import { pool } from "../../db.js";

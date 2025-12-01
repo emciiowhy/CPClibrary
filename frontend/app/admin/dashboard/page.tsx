@@ -22,8 +22,28 @@ interface BorrowRecord {
   dueDate: string;
 }
 
+interface BorrowedHistory {
+  borrow_id: number;
+  borrow_code: string;
+  borrow_date: string;
+  due_date: string;
+  status: string;
+  student_name: string;
+  student_school_id: string;
+  book_title: string;
+  book_author: string;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
+  const [stats, setStats] = useState({
+    totalBooks: 0,
+    totalMembers: 0,
+    borrowedBooks: 0,
+  });
+
+  const [borrowedHistory, setBorrowedHistory] = useState<BorrowedHistory[]>([]);
+
   useEffect(() => {
     const verifyAdmin = async () => {
       try {
@@ -45,21 +65,33 @@ export default function DashboardPage() {
     verifyAdmin();
   });
 
-  const [stats, setStats] = useState({
-    totalBooks: 0,
-    totalMembers: 0,
-    borrowedBooks: 0,
-  });
+  useEffect(() => {
+    const getBooks = async () => {
+      try {
+        const books = await api.get('/api/books');
+        const students = await api.get('/api/students');
+        const borrowed = await api.get('/api/borrowed');
+        setBorrowedHistory(borrowed.data.data);
+
+        setStats({
+          totalBooks: books.data.length,
+          totalMembers: students.data.length,
+          borrowedBooks: borrowed.data.data.length,
+        });
+
+      } catch (error) {
+        toast.error("Error in getting books");
+        console.log("Error getting books " + error);
+        return;
+      }
+    }
+
+    getBooks();
+  }, [])
 
   const [recentRecords, setRecentRecords] = useState<BorrowRecord[]>([]);
 
   useEffect(() => {
-    setStats({
-      totalBooks: 4,
-      totalMembers: 3,
-      borrowedBooks: 2,
-    });
-
     // ✅ Now TypeScript knows the array’s shape
     setRecentRecords([
       {
@@ -135,13 +167,13 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {recentRecords.map((record) => (
-                <tr key={record.id}>
-                  <td className="text-sm border-b p-2">{record.studentName}</td>
-                  <td className="text-sm border-b p-2">{record.bookTitle}</td>
+              {borrowedHistory.map((borrowed, i) => (
+                <tr key={i}>
+                  <td className="text-sm border-b p-2">{borrowed.student_name}</td>
+                  <td className="text-sm border-b p-2">{borrowed.book_title}</td>
 
-                  <td className="text-sm border-b p-2">{record.dateIssued}</td>
-                  <td className="text-sm border-b p-2">{record.dueDate}</td>
+                  <td className="text-sm border-b p-2">{new Date(borrowed.borrow_date).toLocaleDateString()}</td>
+                  <td className="text-sm border-b p-2">{new Date(borrowed.due_date).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

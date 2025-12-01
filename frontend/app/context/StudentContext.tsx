@@ -8,6 +8,7 @@ type StudentData = {
   email: String,
   password: String,
   role: String,
+  course: String,
 };
 
 type StudentContexType = {
@@ -25,6 +26,7 @@ export const StudentProvider = ({ children } : { children: React.ReactNode }) =>
     email: "",
     password: "",
     role: "",
+    course: "",
   });
 
   const setStudentData = (data:Partial<StudentData>) => {
@@ -38,6 +40,7 @@ export const StudentProvider = ({ children } : { children: React.ReactNode }) =>
       email: "",
       password: "",
       role: "",
+      course: "",
     });
   };
 

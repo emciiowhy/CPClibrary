@@ -6,7 +6,10 @@ dotenv.config();
 import nodemailer from "nodemailer";
 import { generateOTP } from "../../utils/otpGenerator.js";
 import { pool } from "../../db.js";
-import { generateAccessToken } from "../../utils/jwt.js";
+import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
+import { relations } from "drizzle-orm";
+import { getAllStudents } from "../../models/studentsModel.js";
+import { cloudinary, uploadProfile } from "../../utils/cloudinary.js";
 
 export const fetchStudents = async (req, res) => {
   try {
@@ -32,31 +35,37 @@ export const loginStudentController = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({message: "Invalid password", success: false});
 
-    // const token = jwt.sign(
-    //   {id: user.id, email: user.email, schoolId: user.student_id, role: user.role},
-    //   process.env.MY_SECRET_KEY,
-    //   {expiresIn: "1hr"}
-    // );
-
-    const token = generateAccessToken({
+    const accessToken = generateAccessToken({
       id: user.id, 
       email: user.email, 
       schoolId: user.student_id, 
       role: user.role,
     });
 
-     res.cookie('token', token, {
+    const refreshToken = generateRefreshToken({
+      id: user.id,
+      email: user.email,
+      schoolId: user.student_id,
+      role: user.role,
+    })
+
+     res.cookie('access_token', accessToken, {
         httpOnly: true,
-        // secure: process.env.NODE_ENV === 'development', // Only send over HTTPS in production
-        sameSite: 'Lax',
-        maxAge: 5 * 60 * 1000
+        sameSite: 'lax',
+        maxAge: 5 * 60 * 1000,
+    });
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
     // res.setHeader('Authorization', `Bearer ${token}`);  
     
     res.json({
       message: "Login Successfully",
-      token,
       success: true,
       student: {
         id: user.id,
@@ -73,7 +82,7 @@ export const loginStudentController = async (req, res) => {
 }
 
 export const registerStudentRequestController = async (req, res) => {
-  const {name, schoolId, email, password} = req.body;
+  const {name, schoolId, email, password, course} = req.body;
 
   try {
     const existingStudentByEmail = await findStudentsByEmail(email);
@@ -183,7 +192,7 @@ export const verifyStudentOtpController = async (req, res) => {
 }
 
 export const finalRegisterStudentController = async (req, res) => {
-  const {name, email, schoolId, password} = req.body;
+  const {name, email, schoolId, password, course} = req.body;
 
   try {
     const existingStudentByEmail = await findStudentsByEmail(email);
@@ -221,10 +230,10 @@ export const finalRegisterStudentController = async (req, res) => {
 
     const newStudent = await pool.query(
       `
-        INSERT INTO students (name, email, student_id, password)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO students (name, email, student_id, password, course)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
-      `, [name, email, schoolId, hashedPassword]
+      `, [name, email, schoolId, hashedPassword, course]
     );
 
     await pool.query(
@@ -362,13 +371,21 @@ export const resetPasswordStudentsController = async (req, res) => {
 
 export const logoutStudent = async (req, res) => {
   try {
-    res.cookie("token", "", {
+    res.cookie("access_token", "", {
       httpOnly: true,
       secure: false,
-      sameSite: "Lax",
+      sameSite: "lax",
       maxAge: 0,
       path: "/",
     });
+
+    res.cookie("refresh_token", "", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 0,
+      path: "/",
+    })
 
     res.status(200).json({
       message: "Logged out successfully!",
@@ -381,6 +398,99 @@ export const logoutStudent = async (req, res) => {
       message: "Logout failed",
       error: error.message,
       success: false
+    })
+  }
+}
+
+export const findStudent = async (req, res) => {
+  try {
+    const email = req.user.email;
+    const student = await findStudentsByEmail(email);
+
+    res.status(200).json({
+      student: student,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Finding student failed",
+      success: false,
+      error: error.message,
+    })
+  }
+}
+
+const DEFAULT_PROFILE_CONFIG = {
+  url: process.env.STOCK_PROFILE_URL,
+  public_id: 'default-profile-picture'
+}
+
+const processStockProfile = async (req) => {
+  if (!req.file) {
+    return {
+      url: DEFAULT_PROFILE_CONFIG.url,
+      public_id: DEFAULT_PROFILE_CONFIG.public_id,
+      isDefault: true,
+    }
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "profiles",
+      public_id: `${Date.now()}-${req.file.originalname}`,
+      overwrite: true,
+    });
+
+    return {
+      url: result.secure_url,
+      public_id: result.public_id,
+      isDefault: false,
+    };
+  } catch (error) {
+    console.error("Cloudinary upload failed:", error);
+    return {
+      url: DEFAULT_PROFILE_CONFIG.url,
+      public_id: DEFAULT_PROFILE_CONFIG.public_id,
+      isDefault: true,
+    }
+  }
+}
+
+export const updateProfile = async (req, res) => {
+  const studentId = req.user.id;
+  const {name, email, course, section} = req.body;
+  try {
+    const profilePicture = req.file
+      ? { url: req.file.path, public_id: req.file.filename }
+      : { url: DEFAULT_PROFILE_CONFIG.url, public_id: DEFAULT_PROFILE_CONFIG.public_id };
+
+
+    const query = `
+      UPDATE students
+      SET name = $1, 
+          email = $2, 
+          course = $3, 
+          section = $4, 
+          profile_url = $6, 
+          profile_public_id = $7
+      WHERE id = $5
+      RETURNING name, email, course, section, id, profile_url, profile_public_id;
+    `
+
+    const values = [name, email, course, section, studentId, profilePicture.url, profilePicture.public_id];
+    const result = await pool.query(query, values);
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      student: result.rows[0],
+    })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error in updatin profile",
+      success: false,
     })
   }
 }

@@ -1,60 +1,81 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/admin/SidebarAdmin";
 import Header from "@/components/layout/admin/HeaderAdmin";
-import { ChevronRight, Search, PanelRightClose } from "lucide-react";
+import { Search, PanelRightClose } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 interface StudentType {
   id: number;
   name: string;
-  schoolId: string;
-  course: string;
-  section: string;
+  email: string;
+  student_id: string;
   status: string;
+  section: string;
+  course: string;
 }
 
 export default function MembersPage() {
   const [openSideBar, setOpenSideBar] = React.useState(true);
 
-  const [recentRegisteredStudents, setRecentRegisteredStudents] =
-    React.useState<StudentType[]>([]);
+  const [recentRegisteredStudents, setRecentRegisteredStudents] = React.useState<StudentType[]>([]);
+  const [recentLimit, setRecentLimit] = useState(3);
+  const [students, setStudents] = React.useState<StudentType[]>([]);
+
+  // useEffect(() => {
+  //   setRecentRegisteredStudents([
+  //     {
+  //       id: 1,
+  //       name: "Jerson Jay C. Bonghanoy",
+  //       schoolId: "2021001",
+  //       course: "BSIT",
+  //       section: "A",
+  //       status: "Active",
+  //     },
+  //     {
+  //       id: 2,
+  //       name: "Goku Son Gohan",
+  //       schoolId: "2021002",
+  //       course: "BEED",
+  //       section: "B",
+  //       status: "Active",
+  //     },
+  //     {
+  //       id: 3,
+  //       name: "Naruto Uzumaki",
+  //       schoolId: "2021003",
+  //       course: "BSHM",
+  //       section: "A",
+  //       status: "Active",
+  //     },
+  //     {
+  //       id: 4,
+  //       name: "Ninja Picollo",
+  //       schoolId: "2021004",
+  //       course: "BSIT",
+  //       section: "A",
+  //       status: "Inactive",
+  //     },
+  //   ]);
+  // }, []);
 
   useEffect(() => {
-    setRecentRegisteredStudents([
-      {
-        id: 1,
-        name: "Jerson Jay C. Bonghanoy",
-        schoolId: "2021001",
-        course: "BSIT",
-        section: "A",
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Goku Son Gohan",
-        schoolId: "2021002",
-        course: "BEED",
-        section: "B",
-        status: "Active",
-      },
-      {
-        id: 3,
-        name: "Naruto Uzumaki",
-        schoolId: "2021003",
-        course: "BSHM",
-        section: "A",
-        status: "Active",
-      },
-      {
-        id: 4,
-        name: "Ninja Picollo",
-        schoolId: "2021004",
-        course: "BSIT",
-        section: "A",
-        status: "Inactive",
-      },
-    ]);
-  }, []);
+    const getStudents = async () => {
+      try {
+        const response = await api.get('/api/students');
+
+        setStudents(response.data);
+        console.log(students);
+      } catch (error) {
+        toast.error("Error getting students");
+        console.log("Error getting students member page " + error);
+        return;
+      }
+    }
+
+    getStudents();
+  }, [])
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -126,8 +147,8 @@ export default function MembersPage() {
 
             <table>
               <tbody className="divide-y">
-                {recentRegisteredStudents
-                  .slice(0, recentRegisteredStudents.length)
+                {students
+                  .slice(0, recentLimit)
                 .map((student) => (
                     <tr
                       key={student.id}
@@ -139,12 +160,14 @@ export default function MembersPage() {
                         </div>
                       </td>
                       <td>{student.name}</td>
-                      <td>{student.schoolId}</td>
+                      <td>{student.student_id}</td>
                       <td className="font-semibold text-blue-600">
                         {student.course}
                       </td>
-                      <td>{student.section}</td>
-                      <td className={`font-semibold ${student.status === "Active" ? "text-green-500" : "text-gray-400"}`}>{student.status}</td>
+                      <td className={`font-semibold ${student.section === 'not set' ? 'text-gray-400' : 'text-blue-600'}`}>
+                        {student.section}
+                      </td>
+                      <td className={`font-semibold ${student.status === "active" ? "text-green-600" : "text-gray-400"}`}>{student.status}</td>
                     </tr>
                   ))}
               </tbody>
@@ -154,7 +177,7 @@ export default function MembersPage() {
 
         <div className="bg-white p-6 rounded-lg shadow flex-1 flex flex-col">
           <h1 className="text-md text-gray-700 font-bold my-3">
-            Previously Registered Students
+            All Registered Students
           </h1>
 
           <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
@@ -169,9 +192,7 @@ export default function MembersPage() {
 
             <table>
               <tbody className="divide-y">
-                {recentRegisteredStudents
-                  .slice(0, recentRegisteredStudents.length)
-                .map((student) => (
+                {students.map((student) => (
                     <tr
                       key={student.id}
                       className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
@@ -182,12 +203,14 @@ export default function MembersPage() {
                         </div>
                       </td>
                       <td>{student.name}</td>
-                      <td>{student.schoolId}</td>
-                      <td className="font-semibold text-blue-600">
+                      <td>{student.student_id}</td>
+                      <td className={`font-semibold text-blue-600`}>
                         {student.course}
                       </td>
-                      <td>{student.section}</td>
-                      <td className={`font-semibold ${student.status === "Active" ? "text-green-500" : "text-gray-400"}`}>{student.status}</td>
+                      <td className={`font-semibold ${student.section === 'not set' ? 'text-gray-400' : 'text-blue-600'}`}>
+                        {student.section}
+                      </td>
+                      <td className={`font-semibold ${student.status === "active" ? "text-green-600" : "text-gray-400"}`}>{student.status}</td>
                     </tr>
                   ))}
               </tbody>
