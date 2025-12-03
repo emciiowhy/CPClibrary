@@ -11,6 +11,7 @@ import nodemailer from "nodemailer";
 import { generateOTP } from "../../utils/otpGenerator.js";
 import { pool } from "../../db.js";
 import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
+import { findBookById } from "../../models/authModel.js";
 
 export const fetchAdmins = async (req, res) => {
   try {
@@ -537,7 +538,6 @@ export const restoreStudent = async (req, res) => {
   }
 };
 
-
 export const getDeletedStudents = async (req, res) => {
   try {
     const result = await pool.query(`
@@ -551,6 +551,54 @@ export const getDeletedStudents = async (req, res) => {
     console.log(error);
     return res.status(500).json({
       message: error,
+    })
+  }
+}
+
+export const setStudentBorrowedStatus = async (req, res) => {
+  try {
+    const { borrowedStatus, borrowId } = req.body;
+
+    const query = `
+      UPDATE borrow_records
+      SET status = $1
+      WHERE id = $2
+    `;
+
+    await pool.query(query, [borrowedStatus, borrowId]);
+
+    res.json({
+      message: "Set status to " + borrowedStatus + " successfully",
+      success: true,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error setting student borrowed status",
+      error: error,
+    })
+  }
+}
+
+export const extendDueDate = async (req, res) => {
+  try {
+    const { borrowId, extendDueDateValue } = req.body;
+
+    await pool.query(`
+      UPDATE borrow_records
+      SET due_date = $1
+      WHERE id = $2;
+    `, [extendDueDateValue, borrowId]);
+
+    res.json({
+      message: "Extend due date successfully",
+      success: true,
+    });
+    
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      success: false,
     })
   }
 }
