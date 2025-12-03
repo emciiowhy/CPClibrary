@@ -11,39 +11,14 @@ import {
 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-import api from "@/lib/api";
-import { toast } from "sonner";
-
-interface BorrowRecord {
-  id: number;
-  studentName: string;
-  bookTitle: string;
-  dateIssued: string;
-  dueDate: string;
-}
+import { useBooks } from "@/hooks/useBooks";
+import { useMembers } from "@/hooks/useMembers";
+import { useBorrow } from "@/hooks/useBorrow";
 
 export default function DashboardPage() {
-  const router = useRouter();
-  useEffect(() => {
-    const verifyAdmin = async () => {
-      try {
-        const result = await api.get('api/admins/verify-admin');
-        if (!result.data.success) {
-          toast.error("Login First");
-          console.log("error ari sa if");
-          router.push('/admin/auth/login');
-        }
-
-      } catch (error: any) {
-        toast.error(error.response.data.message);
-        console.log(error);
-        router.push('/admin/auth/login');
-        return;
-      }
-    };
-
-    verifyAdmin();
-  });
+  const { books } = useBooks();
+  const { members } = useMembers();
+  const { borrowRecords, borrowStats } = useBorrow();
 
   const [stats, setStats] = useState({
     totalBooks: 0,
@@ -51,33 +26,16 @@ export default function DashboardPage() {
     borrowedBooks: 0,
   });
 
-  const [recentRecords, setRecentRecords] = useState<BorrowRecord[]>([]);
-
   useEffect(() => {
     setStats({
-      totalBooks: 4,
-      totalMembers: 3,
-      borrowedBooks: 2,
+      totalBooks: books.length,
+      totalMembers: members.length,
+      borrowedBooks: borrowStats.totalBorrowed,
     });
+  }, [books.length, members.length, borrowStats.totalBorrowed]);
 
-    // ✅ Now TypeScript knows the array’s shape
-    setRecentRecords([
-      {
-        id: 1,
-        studentName: "Juan Dela Cruz",
-        bookTitle: "Introduction to Computer Science",
-        dateIssued: "2024-10-15",
-        dueDate: "2024-10-29",
-      },
-      {
-        id: 2,
-        studentName: "Maria Santos",
-        bookTitle: "Database Management Systems",
-        dateIssued: "2024-10-16",
-        dueDate: "2024-10-30",
-      },
-    ]);
-  }, []);
+  // Get recent borrow records (last 5)
+  const recentRecords = borrowRecords.slice(0, 5);
 
   const [openSideBar, setOpenSideBar] = useState(true);
 
@@ -135,15 +93,26 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {recentRecords.map((record) => (
-                <tr key={record.id}>
-                  <td className="text-sm border-b p-2">{record.studentName}</td>
-                  <td className="text-sm border-b p-2">{record.bookTitle}</td>
-
-                  <td className="text-sm border-b p-2">{record.dateIssued}</td>
-                  <td className="text-sm border-b p-2">{record.dueDate}</td>
+              {recentRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-sm text-center py-4 text-gray-500">
+                    No recent borrow records
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                recentRecords.map((record) => (
+                  <tr key={record.id}>
+                    <td className="text-sm border-b p-2">{record.memberName}</td>
+                    <td className="text-sm border-b p-2">{record.bookTitle}</td>
+                    <td className="text-sm border-b p-2">
+                      {new Date(record.issueDate).toLocaleDateString()}
+                    </td>
+                    <td className="text-sm border-b p-2">
+                      {new Date(record.dueDate).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

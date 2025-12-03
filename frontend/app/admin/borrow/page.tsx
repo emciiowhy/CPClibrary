@@ -2,34 +2,17 @@
 import React, { useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-import { ChevronRight } from "lucide-react";
-
-interface BorrowedHistory {
-  name: string,
-  studentId: string,
-  bookBorrowed: string,
-  date: string,
-  dueDate: string,
-  status: string,
-}
+import { ChevronRight, BookOpen, AlertCircle } from "lucide-react";
+import { useBorrow } from "@/hooks/useBorrow";
+import { BorrowRecord } from "@/types/borrow";
 
 export default function BorrowBookPage() {
   const [openSideBar, setOpenSideBar] = React.useState(true);
-
-  const [borrowedBook, setBorrowedBook] = React.useState<BorrowedHistory[]>([]);
+  const { borrowRecords, loading, error, fetchBorrowRecords } = useBorrow();
 
   useEffect(() => {
-    setBorrowedBook([
-    {
-      name: "Jerson Jay",
-      studentId: "20240891",
-      bookBorrowed: "BASTA LIBRO",
-      date: "10-02-25",
-      dueDate: "12-21-25",
-      status: "borrowed"
-    },
-    ])
-  }, [])
+    fetchBorrowRecords();
+  }, []);
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
       <Header />
@@ -64,20 +47,46 @@ export default function BorrowBookPage() {
             </div>
 
             <div className="divide-y">
-              { borrowedBook
-                .slice(0, 4)
-                .map((book) => (
-                  <div
-                    className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
-                  >
-                    <div>{book.name}</div>
-                    <div>{book.studentId}</div>
-                    <div>{book.bookBorrowed}</div>
-                    <div>{book.date}</div>
-                    <div>{book.dueDate}</div>
-                    <div>{book.status}</div>
-                  </div>
-                ))}
+              {loading ? (
+                <div className="px-4 py-8 text-center text-gray-500">
+                  Loading borrow records...
+                </div>
+              ) : error ? (
+                <div className="px-4 py-8 text-center text-red-500 flex items-center justify-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+              ) : borrowRecords.length === 0 ? (
+                <div className="px-4 py-8 text-center text-gray-500">
+                  No borrow records found
+                </div>
+              ) : (
+                borrowRecords
+                  .slice(0, 10)
+                  .map((record: BorrowRecord) => (
+                    <div
+                      key={record.id}
+                      className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                    >
+                      <div>{record.memberName}</div>
+                      <div>{record.studentId}</div>
+                      <div>{record.bookTitle}</div>
+                      <div>{new Date(record.issueDate).toLocaleDateString()}</div>
+                      <div>{new Date(record.dueDate).toLocaleDateString()}</div>
+                      <div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          record.status === 'borrowed'
+                            ? 'bg-blue-100 text-blue-800'
+                            : record.status === 'returned'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {record.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+              )}
             </div>
           </div>
         </div>

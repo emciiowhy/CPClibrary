@@ -15,11 +15,12 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
   const [submitted, setSubmitted] = useState(false);
 
   const menuItems = [
-    { path: '/admin/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/admin/books', icon: Book, label: 'Books' },
-    { path: '/admin/members', icon: Users, label: 'Students' },
-    { path: '/admin/books/add', icon: BookPlus, label: 'Add Book' },
-    { path: '/admin/borrow', icon: Clock, label: 'Borrow Records' },
+    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/books', icon: Book, label: 'Books' },
+    { path: '/members', icon: Users, label: 'Students' },
+    { path: '/books/add', icon: BookPlus, label: 'Add Book' },
+    { path: '/borrow', icon: Clock, label: 'Borrow Records' },
+    { path: '/borrow/issue', icon: BookOpen, label: 'Issue Book' },
   ];
 
   const handleLogout = async () => {

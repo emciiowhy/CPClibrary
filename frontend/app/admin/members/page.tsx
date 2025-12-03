@@ -1,60 +1,25 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-import { ChevronRight, Search, PanelRightClose } from "lucide-react";
-
-interface StudentType {
-  id: number;
-  name: string;
-  schoolId: string;
-  course: string;
-  section: string;
-  status: string;
-}
+import { ChevronRight, Search, PanelRightClose, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useMembers } from "@/hooks/useMembers";
+import Link from "next/link";
 
 export default function MembersPage() {
   const [openSideBar, setOpenSideBar] = React.useState(true);
+  const { members, loading, error } = useMembers();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState("");
 
-  const [recentRegisteredStudents, setRecentRegisteredStudents] =
-    React.useState<StudentType[]>([]);
-
-  useEffect(() => {
-    setRecentRegisteredStudents([
-      {
-        id: 1,
-        name: "Jerson Jay C. Bonghanoy",
-        schoolId: "2021001",
-        course: "BSIT",
-        section: "A",
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Goku Son Gohan",
-        schoolId: "2021002",
-        course: "BEED",
-        section: "B",
-        status: "Active",
-      },
-      {
-        id: 3,
-        name: "Naruto Uzumaki",
-        schoolId: "2021003",
-        course: "BSHM",
-        section: "A",
-        status: "Active",
-      },
-      {
-        id: 4,
-        name: "Ninja Picollo",
-        schoolId: "2021004",
-        course: "BSIT",
-        section: "A",
-        status: "Inactive",
-      },
-    ]);
-  }, []);
+  // Filter members based on search
+  const filteredMembers = members.filter((member) => {
+    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         member.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -81,9 +46,18 @@ export default function MembersPage() {
               <input
                 type="text"
                 placeholder="Search students..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
               />
             </div>
+
+            <Link href="/members/add">
+              <Button className="flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                Add Member
+              </Button>
+            </Link>
 
             <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
               <label
@@ -110,88 +84,52 @@ export default function MembersPage() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow flex-1 flex flex-col">
-          <h1 className="text-md text-gray-700 font-bold my-3">
-            Recent Registered
-          </h1>
-
-          <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
-            <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
-              <div>Profile</div>
-              <div>Name</div>
-              <div>School ID</div>
-              <div>Course</div>
-              <div>Section</div>
-              <div>Status</div>
-            </div>
-
-            <table>
-              <tbody className="divide-y">
-                {recentRegisteredStudents
-                  .slice(0, recentRegisteredStudents.length)
-                .map((student) => (
-                    <tr
-                      key={student.id}
-                      className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
-                    >
-                      <td className="flex md:block justify-start md:text-center">
-                        <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
-                          {student.name.charAt(0)}
-                        </div>
-                      </td>
-                      <td>{student.name}</td>
-                      <td>{student.schoolId}</td>
-                      <td className="font-semibold text-blue-600">
-                        {student.course}
-                      </td>
-                      <td>{student.section}</td>
-                      <td className={`font-semibold ${student.status === "Active" ? "text-green-500" : "text-gray-400"}`}>{student.status}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-md text-gray-700 font-bold">All Members</h1>
+            <span className="text-sm text-gray-500">{filteredMembers.length} members</span>
           </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow flex-1 flex flex-col">
-          <h1 className="text-md text-gray-700 font-bold my-3">
-            Previously Registered Students
-          </h1>
 
           <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
-            <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
+            <div className="hidden md:grid grid-cols-4 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
               <div>Profile</div>
               <div>Name</div>
-              <div>School ID</div>
-              <div>Course</div>
-              <div>Section</div>
-              <div>Status</div>
+              <div>Student ID</div>
+              <div>Email</div>
             </div>
 
-            <table>
-              <tbody className="divide-y">
-                {recentRegisteredStudents
-                  .slice(0, recentRegisteredStudents.length)
-                .map((student) => (
-                    <tr
-                      key={student.id}
-                      className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
-                    >
-                      <td className="flex md:block justify-start md:text-center">
-                        <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
-                          {student.name.charAt(0)}
-                        </div>
-                      </td>
-                      <td>{student.name}</td>
-                      <td>{student.schoolId}</td>
-                      <td className="font-semibold text-blue-600">
-                        {student.course}
-                      </td>
-                      <td>{student.section}</td>
-                      <td className={`font-semibold ${student.status === "Active" ? "text-green-500" : "text-gray-400"}`}>{student.status}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            <div className="divide-y flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="ml-2 text-gray-500">Loading members...</span>
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center py-8">
+                  <span className="text-red-500">{error}</span>
+                </div>
+              ) : filteredMembers.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                  <span className="text-gray-500">No members found</span>
+                </div>
+              ) : (
+                filteredMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    className="grid grid-cols-1 sm:grid-cols-4 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                  >
+                    <div className="flex md:block justify-start md:text-center">
+                      <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center font-medium text-white">
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+
+                    <div className="font-medium">{member.name}</div>
+                    <div className="text-blue-600 font-semibold">{member.studentId}</div>
+                    <div className="text-gray-600">{member.email}</div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </main>

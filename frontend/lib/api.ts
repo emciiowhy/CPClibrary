@@ -1,59 +1,36 @@
 import axios from 'axios';
+import { BorrowRecord, IssueBookRequest, ReturnBookRequest, BorrowStats } from '@/types/borrow';
 
-// Create axios instance with base configuration
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+export const borrowApi = {
+  // Issue a book
+  issueBook: async (data: IssueBookRequest): Promise<BorrowRecord> => {
+    const response = await axios.post(`${API_BASE_URL}/borrow/issue`, data);
+    return response.data;
   },
-});
 
-// Request interceptor for adding auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+  // Return a book
+  returnBook: async (data: ReturnBookRequest): Promise<BorrowRecord> => {
+    const response = await axios.post(`${API_BASE_URL}/borrow/return`, data);
+    return response.data.record;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
-// Response interceptor for handling errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const shouldSkipRedirect = (() => {
-        const url = error.config?.url || "";
-        const authEndpoints = [
-          "/admins/login",
-          "/admins/register",
-          "/students/login",
-          "/students/register",
-        ];
-        const isAuthRequest = authEndpoints.some((endpoint) =>
-          url.includes(endpoint)
-        );
+  // Get borrow records
+  getBorrowRecords: async (): Promise<BorrowRecord[]> => {
+    const response = await axios.get(`${API_BASE_URL}/borrow`);
+    return response.data;
+  },
 
-        const isAuthPage =
-          typeof window !== "undefined" &&
-          window.location.pathname.includes("/auth/");
+  // Get borrow stats
+  getBorrowStats: async (): Promise<BorrowStats> => {
+    const response = await axios.get(`${API_BASE_URL}/borrow/stats`);
+    return response.data;
+  },
 
-        return isAuthRequest || isAuthPage;
-      })();
-
-      if (!shouldSkipRedirect) {
-        localStorage.removeItem("token");
-        window.location.href = "/admin/auth/login";
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
+  // Get borrow record by ID
+  getBorrowRecord: async (id: number): Promise<BorrowRecord> => {
+    const response = await axios.get(`${API_BASE_URL}/borrow/${id}`);
+    return response.data;
+  },
+};
