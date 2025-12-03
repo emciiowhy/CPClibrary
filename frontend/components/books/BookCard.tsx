@@ -9,6 +9,7 @@ interface BookCardProps {
   bookCourse: string;
   bookStatus: boolean;
   bookYear: string;
+  bookCopies: number;
 }
 
 export default function BookCard(props: BookCardProps) {
@@ -34,7 +35,7 @@ export default function BookCard(props: BookCardProps) {
           </div>
           <div className="flex items-center text-sm">{props.bookCourse}</div>
           <div className="flex items-center text-sm">{props.bookYear}</div>
-          <div className={`font-semibold flex items-center text-sm ${props.bookStatus ? "text-green-600" : "text-red-600"}`}>{props.bookStatus ? "Available" : "Not Available"}</div>
+          <div className={`font-semibold flex items-center text-sm ${props.bookCopies != 0 ? "text-green-600" : "text-red-600"}`}>{props.bookCopies != 0 ? "Available" : "Unavailable"}</div>
         </div>
       </div>
 

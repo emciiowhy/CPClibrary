@@ -103,16 +103,24 @@ export const verifyAdminToken = async (req, res) => {
 
 export const verifyStudentToken = async (req, res) => {
   try {
-    const token = req.cookies.access_token;
+    const access_token = req.cookies.access_token;
+    const refresh_token = req.cookies.refresh_token;
 
-    if (!token) {
+    if (refresh_token) {
+      return res.status(200).json({
+        message: "Redirected to dashboard",
+        success: true,
+      });
+    };
+
+    if (!access_token) {
       return res.status(401).json({
         message: "Token not provided",
         success: false,
       });
     }
 
-    const decoded = jwt.verify(token, getAccessSecret());
+    const decoded = jwt.verify(access_token, getAccessSecret());
     const studentResult = await pool.query(
       `
         SELECT id, name, email, role
@@ -214,3 +222,21 @@ export const refreshToken = async (req, res) => {
     });
   }
 };
+
+export const redirectUser = async (req, res) => {
+  try {
+    const refresh_token = req.cookies.refresh_token;
+    const decoded = jwt.verify(refresh_token, getRefreshSecret());
+
+    return res.json({
+      message: "Redirecting to " + decoded.role + " dashboard",
+      success: true,
+      decoded,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error redirecting user",
+      success: false,
+    })
+  }
+}

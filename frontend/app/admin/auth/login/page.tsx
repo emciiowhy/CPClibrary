@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Mail, Lock } from 'lucide-react';
@@ -18,6 +18,30 @@ export default function LoginPageAdmin() {
   const [password, setPassword] = useState('');
   const {admin, setAdminData, clearAdminData} = useAdmin();
   const [submitted, setSubmitted] = useState(false);
+
+  //authentication access
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      try {
+        const result = await api.get('api/check-token');
+        if (result.data.decoded.role === "student") {
+          toast.success(result.data.message);
+          router.push('/students/dashboard');
+        }
+
+        if (result.data.decoded.role === "admin") {
+          toast.success(result.data.message);
+          router.push('/admin/dashboard');
+        }
+
+      } catch (error: any) {
+        console.log(error);
+        return;
+      }
+    };
+
+    verifyAdmin();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +61,6 @@ export default function LoginPageAdmin() {
       toast.error(error.response.data.message || 'Login failed. Please try again.');
     }
   }
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

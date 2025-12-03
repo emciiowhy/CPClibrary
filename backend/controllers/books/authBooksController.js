@@ -2,6 +2,7 @@ import { getAllBooks } from "../../models/booksModel.js";
 import { pool } from "../../db.js";
 import { findBookById } from "../../models/authModel.js"
 import jwt from "jsonwebtoken";
+import QRCode from "qrcode";
 
 const DEFAULT_COVER_CONFIG = {
   url: process.env.STOCK_BOOK_COVER_URL,
@@ -144,13 +145,20 @@ export const borrowBook = async (req, res) => {
 
     const borrowCode = generateBorrowCode();
     const due_date = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+    const qrData = `
+      Borrow Code: ${borrowCode}
+      Borrow Title: ${book.title}
+      Student ID: ${student.student_id}
+      Due Date: ${due_date.toLocaleString()}
+    `;
+    const qrCodeImage = await QRCode.toDataURL(qrData);
 
     const record = await pool.query(
       `
-        INSERT INTO borrow_records (student_id, book_id, due_date, borrow_code)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO borrow_records (student_id, book_id, due_date, borrow_code, qr_code)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
-      `, [studentPrimaryId, book_id, due_date, borrowCode]
+      `, [studentPrimaryId, book_id, due_date, borrowCode, qrCodeImage]
     );
 
     await pool.query(
@@ -168,7 +176,8 @@ export const borrowBook = async (req, res) => {
         book_id: book.id,
         book_title: book.title,
         borrow_date: record.rows[0].borrow_date,
-        due_date: record.rows[0].due_date
+        due_date: record.rows[0].due_date,
+        qr_code: record.rows[0].qr_code,
       }
     });
 

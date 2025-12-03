@@ -36,6 +36,27 @@ export default function BrowseBook() {
   const [openSideBar, setOpenSideBar] = useState(true);
   const [books, setBooks] = React.useState<BookType[]>([]);
 
+  //authentication access
+  useEffect(() => {
+    const verifyStudent = async () => {
+      try {
+        const result = await api.get('api/students/verify-student');
+        if (!result.data.success) {
+          toast.error("Login First");
+          router.push('/students/auth/login');
+        }
+
+      } catch (error: any) {
+        toast.error(error.response.data.message);
+        console.log(error);
+        router.push('/students/auth/login');
+        return;
+      }
+    };
+
+    verifyStudent();
+  }, []);
+
   useEffect(() => {
     const getBooks = async () => {
       try {
@@ -168,6 +189,7 @@ export default function BrowseBook() {
                           bookStatus={book.available}
                           bookCourse={book.course}
                           bookDescription={book.description}
+                          bookCopies={book.copies}
                         />
                       </div>
                     </DialogTrigger>

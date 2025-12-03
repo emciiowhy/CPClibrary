@@ -20,6 +20,30 @@ export default function ForgotPasswordStudent() {
   const [otpMessage, setOtpMessage] = useState("Request OTP");
   const [secondsLeft, setSecondsLeft] = useState(0);
 
+  //authentication access
+  useEffect(() => {
+    const verifyStudent = async () => {
+      try {
+        const result = await api.get('api/check-token');
+        if (result.data.decoded.role === "student") {
+          toast.success(result.data.message);
+          router.push('/students/dashboard');
+        }
+
+        if (result.data.decoded.role === "admin") {
+          toast.success(result.data.message);
+          router.push('/admin/dashboard');
+        }
+
+      } catch (error: any) {
+        console.log(error);
+        return;
+      }
+    };
+
+    verifyStudent();
+  }, []);
+
   useEffect(() => {
     if (!disableOtpRequest) return;
     if (secondsLeft <= 0) {

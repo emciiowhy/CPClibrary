@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -22,6 +22,30 @@ export default function SignUpPageAdmin() {
   const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
   const [alertMessage, setAlertMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  //authentication access
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      try {
+        const result = await api.get('api/check-token');
+        if (result.data.decoded.role === "student") {
+          toast.success(result.data.message);
+          router.push('/students/dashboard');
+        }
+
+        if (result.data.decoded.role === "admin") {
+          toast.success(result.data.message);
+          router.push('/admin/dashboard');
+        }
+
+      } catch (error: any) {
+        console.log(error);
+        return;
+      }
+    };
+
+    verifyAdmin();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +81,6 @@ export default function SignUpPageAdmin() {
       return;
     }
   }
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

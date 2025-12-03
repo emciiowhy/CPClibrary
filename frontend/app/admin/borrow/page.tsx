@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/admin/SidebarAdmin";
 import Header from "@/components/layout/admin/HeaderAdmin";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, MoreVertical, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 
@@ -61,13 +61,14 @@ export default function BorrowBookPage() {
           </h1>
 
           <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
-            <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
+            <div className="hidden md:grid grid-cols-7 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
               <div>Name</div>
               <div>Student ID</div>
               <div>Book Borrowed</div>
               <div>Date</div>
               <div>Due Date</div>
               <div>Status</div>
+              <div>More</div>
             </div>
 
             <div className="divide-y">
@@ -76,14 +77,29 @@ export default function BorrowBookPage() {
                 .map((book, i) => (
                   <div
                     key={i}
-                    className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                    className="grid grid-cols-1 sm:grid-cols-7 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center "
                   >
-                    <div>{book.student_name}</div>
-                    <div>{book.student_school_id}</div>
-                    <div>{book.book_title}</div>
-                    <div>{new Date(book.borrow_date).toLocaleDateString()}</div>
-                    <div>{new Date(book.due_date).toLocaleDateString()}</div>
-                    <div>{book.status}</div>
+                    <div className="font-semibold text-gray-800">{book.student_name}</div>
+                    <div className="font-semibold text-gray-800">{book.student_school_id}</div>
+                    <div className="font-semibold">{book.book_title}</div>
+                    <div className="font-semibold text-green-700">{new Date(book.borrow_date).toDateString()}</div>
+                    <div className="font-semibold text-red-700">{new Date(book.due_date).toDateString()}</div>
+                    <div className={`flex font-semibold text-sm border-b p-2 
+                      ${
+                        book.status === "pending"
+                          ? "text-gray-700"
+                          : book.status === "returned"
+                          ? "text-green-700"
+                          : book.status === "overdue"
+                          ? "text-red-700"
+                          : "text-blue-700"
+                      }
+                    `}>{book.status}</div>
+                    <div>
+                      <button className="text-gray-700">
+                        <MoreVertical className="text-xs transition-transform hover:scale-[1.1]"/>
+                      </button>
+                    </div>
                   </div>
                 ))}
             </div>

@@ -10,6 +10,8 @@ import {
   Clock,
   LogOut,
   Menu,
+  Trash2,
+  Bell,
 } from "lucide-react";
 import { useState } from "react";
 import { button, div } from "framer-motion/client";
@@ -28,6 +30,8 @@ export default function Header() {
     { path: "/admin/members", icon: Users, label: "Students" },
     { path: "/admin/books/add", icon: Plus, label: "Add Book" },
     { path: "/admin/borrow", icon: Clock, label: "Borrow Records" },
+    { path: "", icon: Bell, label: "Notification" },
+    { path: "/admin/deleted-students", icon: Trash2, label: "Deleted Students"}
   ];
 
   const handleLogout = async () => {

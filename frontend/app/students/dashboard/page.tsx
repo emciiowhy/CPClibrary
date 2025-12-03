@@ -18,25 +18,26 @@ interface BorrowedBooks {
 
 export default function DashboardPage() {
   const router = useRouter();
-  // useEffect(() => {
-  //   const verifyAdmin = async () => {
-  //     try {
-  //       const result = await api.get('api/students/verify-student');
-  //       if (!result.data.success) {
-  //         toast.error("Login First");
-  //         router.push('/students/auth/login');
-  //       }
+  //authentication access
+  useEffect(() => {
+    const verifyStudent = async () => {
+      try {
+        const result = await api.get('api/students/verify-student');
+        if (!result.data.success) {
+          toast.error("Login First");
+          router.push('/students/auth/login');
+        }
 
-  //     } catch (error: any) {
-  //       toast.error(error.response.data.message);
-  //       console.log(error);
-  //       router.push('/students/auth/login');
-  //       return;
-  //     }
-  //   };
+      } catch (error: any) {
+        toast.error(error.response.data.message);
+        console.log(error);
+        router.push('/students/auth/login');
+        return;
+      }
+    };
 
-  //   verifyAdmin();
-  // });
+    verifyStudent();
+  }, []);
 
   const [borrowedBooks, setBorrowedBooks] = useState<BorrowedBooks[]>([]);
   const [openSideBar, setOpenSideBar] = useState(true);

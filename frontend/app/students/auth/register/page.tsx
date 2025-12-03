@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Mail, Lock, BookOpen } from 'lucide-react';
@@ -21,6 +21,30 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
+  //authentication access
+  useEffect(() => {
+    const verifyStudent = async () => {
+      try {
+        const result = await api.get('api/check-token');
+        if (result.data.decoded.role === "student") {
+          toast.success(result.data.message);
+          router.push('/students/dashboard');
+        }
+
+        if (result.data.decoded.role === "admin") {
+          toast.success(result.data.message);
+          router.push('/admin/dashboard');
+        }
+
+      } catch (error: any) {
+        console.log(error);
+        return;
+      }
+    };
+
+    verifyStudent();
+  }, []);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

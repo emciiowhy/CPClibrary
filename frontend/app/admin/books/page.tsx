@@ -23,7 +23,8 @@ interface BookType {
   author: string;
   course: string;
   available: boolean,
-  year: string
+  year: string,
+  copies: number
 }
 
 const Books = () => {
@@ -148,6 +149,7 @@ const Books = () => {
                           bookStatus={book.available}
                           bookCourse={book.course}
                           bookDescription={book.description}
+                          bookCopies={book.copies}
                         />
                       </div>
                     </DialogTrigger>
@@ -158,7 +160,7 @@ const Books = () => {
                       author={book.author} 
                       year={book.year}
                       description={book.description}
-                      copies={25}
+                      copies={book.copies}
                       user="admin"
                     />
                   </Dialog>

@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/admin/SidebarAdmin";
 import Header from "@/components/layout/admin/HeaderAdmin";
-import { Search, PanelRightClose } from "lucide-react";
+import { Search, PanelRightClose, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import MemberMoreInfoMenu from "@/components/members/MemberMoreInfoModal";
 
 interface StudentType {
   id: number;
@@ -22,43 +24,8 @@ export default function MembersPage() {
   const [recentRegisteredStudents, setRecentRegisteredStudents] = React.useState<StudentType[]>([]);
   const [recentLimit, setRecentLimit] = useState(3);
   const [students, setStudents] = React.useState<StudentType[]>([]);
-
-  // useEffect(() => {
-  //   setRecentRegisteredStudents([
-  //     {
-  //       id: 1,
-  //       name: "Jerson Jay C. Bonghanoy",
-  //       schoolId: "2021001",
-  //       course: "BSIT",
-  //       section: "A",
-  //       status: "Active",
-  //     },
-  //     {
-  //       id: 2,
-  //       name: "Goku Son Gohan",
-  //       schoolId: "2021002",
-  //       course: "BEED",
-  //       section: "B",
-  //       status: "Active",
-  //     },
-  //     {
-  //       id: 3,
-  //       name: "Naruto Uzumaki",
-  //       schoolId: "2021003",
-  //       course: "BSHM",
-  //       section: "A",
-  //       status: "Active",
-  //     },
-  //     {
-  //       id: 4,
-  //       name: "Ninja Picollo",
-  //       schoolId: "2021004",
-  //       course: "BSIT",
-  //       section: "A",
-  //       status: "Inactive",
-  //     },
-  //   ]);
-  // }, []);
+  const [submitted, setSubmitted] = useState(false);
+  const [deleteModalOpen, setDeleteModal] = useState(false);
 
   useEffect(() => {
     const getStudents = async () => {
@@ -76,6 +43,46 @@ export default function MembersPage() {
 
     getStudents();
   }, [])
+
+  const handleDeact = async (email: string) => {
+    try {
+      const status = 'inactive';
+      const result = await api.post('/api/admins/change-status', {status, email});
+      toast.success(result.data.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } catch (error: any) {
+      toast.error(error);
+      console.log(error);
+    }
+  }
+
+  const handleActivate = async (email: string) => {
+    try {
+      const status = 'active';
+      const result = await api.post('/api/admins/change-status', {status, email});
+      toast.success(result.data.message);
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.response.data.message || "Error");
+      console.log(error);
+    }
+  }
+
+  const handleDelete = async (email: string, reason: string) => {
+    try {
+      const result = await api.post('/api/admins/delete-student', {reason, email});
+
+      toast.success(result.data.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error: any) {
+      toast.error(error.response.message || "Error");
+      console.log(error);
+    }
+  }
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -181,21 +188,22 @@ export default function MembersPage() {
           </h1>
 
           <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
-            <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
+            <div className="hidden md:grid grid-cols-7 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
               <div>Profile</div>
               <div>Name</div>
               <div>School ID</div>
               <div>Course</div>
               <div>Section</div>
               <div>Status</div>
+              <div>More</div>
             </div>
 
             <table>
               <tbody className="divide-y">
-                {students.map((student) => (
+                {students.map((student, i) => (
                     <tr
                       key={student.id}
-                      className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                      className="grid grid-cols-1 sm:grid-cols-7 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
                     >
                       <td className="flex md:block justify-start md:text-center">
                         <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
@@ -211,6 +219,15 @@ export default function MembersPage() {
                         {student.section}
                       </td>
                       <td className={`font-semibold ${student.status === "active" ? "text-green-600" : "text-gray-400"}`}>{student.status}</td>
+                      <td>
+                        <MemberMoreInfoMenu 
+                          submitted={submitted}
+                          studentStatus={student.status}
+                          deacOnClick={() => handleDeact(student.email)}
+                          activateOnClick={() => handleActivate(student.email)}
+                          deleteOnClick={(reason: string) => handleDelete(student.email, reason)}
+                        />
+                      </td>
                     </tr>
                   ))}
               </tbody>

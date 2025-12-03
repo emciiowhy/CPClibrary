@@ -90,28 +90,8 @@ export default function DashboardPage() {
   }, [])
 
   const [recentRecords, setRecentRecords] = useState<BorrowRecord[]>([]);
-
-  useEffect(() => {
-    // ✅ Now TypeScript knows the array’s shape
-    setRecentRecords([
-      {
-        id: 1,
-        studentName: "Juan Dela Cruz",
-        bookTitle: "Introduction to Computer Science",
-        dateIssued: "2024-10-15",
-        dueDate: "2024-10-29",
-      },
-      {
-        id: 2,
-        studentName: "Maria Santos",
-        bookTitle: "Database Management Systems",
-        dateIssued: "2024-10-16",
-        dueDate: "2024-10-30",
-      },
-    ]);
-  }, []);
-
   const [openSideBar, setOpenSideBar] = useState(true);
+  const recentBorrowLimit = 5;
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -167,7 +147,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {borrowedHistory.map((borrowed, i) => (
+              {borrowedHistory.slice(0, recentBorrowLimit).map((borrowed, i) => (
                 <tr key={i}>
                   <td className="text-sm border-b p-2">{borrowed.student_name}</td>
                   <td className="text-sm border-b p-2">{borrowed.book_title}</td>
