@@ -1,3 +1,4 @@
+// backend/controllers/admins/adminsController.js
 import { getAllAdmins, registerAdmins } from "../../models/adminsModel.js";
 
 export const fetchAdmins = async (req, res) => {

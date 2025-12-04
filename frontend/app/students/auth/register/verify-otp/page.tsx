@@ -1,3 +1,4 @@
+// frontend/app/students/auth/register/verify-otp/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";

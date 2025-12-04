@@ -1,3 +1,4 @@
+// backend/app.js
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
@@ -12,15 +13,16 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: "http://localhost:3001",  // Changed from 3000 to 3001
   credentials: true,
 }));
 
 app.get('/', (req, res) => {
-  res("hi");
+  res.send("hi");  // Fixed: changed res("hi") to res.send("hi")
 })
 
 app.use('/api', studentsRoutes);
-app.use('/api', adminsRoutes, booksRoutes);
+app.use('/api', adminsRoutes);
+app.use('/api', booksRoutes);
 
 export default app;

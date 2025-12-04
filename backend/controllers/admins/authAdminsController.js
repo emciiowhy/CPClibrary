@@ -1,3 +1,4 @@
+// backend/controllers/admins/authAdminsController.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { findAdminsByEmail, findStudentsByEmail } from "../../models/authModel.js";

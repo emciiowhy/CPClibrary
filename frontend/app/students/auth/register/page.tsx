@@ -1,3 +1,4 @@
+// frontend/app/students/auth/register/page.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -6,10 +7,8 @@ import Image from 'next/image';
 import { User, Mail, Lock, BookOpen } from 'lucide-react';
 import { ButtonSubmit } from '@/components/button';
 import { useStudent } from '@/app/context/StudentContext';
-import axios from 'axios';
+import api from '@/lib/api';
 import { toast } from 'sonner';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function SignUpPage() {
   const { setStudentData } = useStudent(); 
@@ -33,15 +32,15 @@ export default function SignUpPage() {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/students/register/request`, {
-        name, 
+      const response = await api.auth.register({
+        fullName: name, 
         schoolId, 
         email, 
         password
       });
       
-      if (response.data.success) {
-        toast.success(response.data.message || "Registration successful! Please check your email for OTP.");
+      if (response.success) {
+        toast.success(response.message || "Registration successful! Please check your email for OTP.");
 
         setStudentData({
           name: name,

@@ -1,3 +1,4 @@
+// backend/index.js
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -9,7 +10,7 @@ const { eq, and } = require('drizzle-orm');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8080;
 
 // Database connection
 const sql = neon(process.env.DATABASE_URL);
