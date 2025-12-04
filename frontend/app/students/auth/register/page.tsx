@@ -6,8 +6,10 @@ import Image from 'next/image';
 import { User, Mail, Lock, BookOpen } from 'lucide-react';
 import { ButtonSubmit } from '@/components/button';
 import { useStudent } from '@/app/context/StudentContext';
-import api from '@/lib/api';
+import axios from 'axios';
 import { toast } from 'sonner';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function SignUpPage() {
   const { setStudentData } = useStudent(); 
@@ -24,14 +26,20 @@ export default function SignUpPage() {
     e.preventDefault();
 
     setSubmitted(true);
-    if (password != confirmPassword) {
-      toast.error("Passwords do not mach");
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
       setSubmitted(false);
       return;
     }
 
     try {
-      const response = await api.post('api/students/register/request', {name, schoolId, email, password});
+      const response = await axios.post(`${API_BASE_URL}/students/register/request`, {
+        name, 
+        schoolId, 
+        email, 
+        password
+      });
+      
       if (response.data.success) {
         toast.success(response.data.message || "Registration successful! Please check your email for OTP.");
 
@@ -40,21 +48,21 @@ export default function SignUpPage() {
           schoolId: schoolId,
           email: email,
           password: password,
-        })
+        });
 
         router.push('/students/auth/register/verify-otp');
       } 
 
     } catch (error: any) {
       setSubmitted(false);
-      if (error.response) {
-        toast.error(error.response.data.message)
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
       } else {
-        toast.error(error);
+        toast.error("Registration failed. Please try again.");
       }
       return;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -85,7 +93,7 @@ export default function SignUpPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
                 value={name}
-                onChange={(e) => {setName(e.target.value)}}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
           </div>
@@ -102,12 +110,9 @@ export default function SignUpPage() {
                 placeholder="Enter your School ID"
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
-                min={1}
                 maxLength={8}
                 value={schoolId}
-                onChange={(e) => {
-                  setSchoolId(e.target.value);
-                }}
+                onChange={(e) => setSchoolId(e.target.value)}
               />
             </div>
           </div>
@@ -123,7 +128,7 @@ export default function SignUpPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
                 value={email}
-                onChange={(e) => {setEmail(e.target.value)}}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
@@ -139,7 +144,7 @@ export default function SignUpPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
                 value={password}
-                onChange={(e) => {setPassword(e.target.value)}}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
@@ -155,7 +160,7 @@ export default function SignUpPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
                 value={confirmPassword}
-                onChange={(e) => {setConfirmPassword(e.target.value)}}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
           </div>
@@ -166,7 +171,7 @@ export default function SignUpPage() {
             buttonType: 'submit',
             className: 'text-md w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors',
             btnText: 'Register',
-            btnLoadingText: 'Registiring',
+            btnLoadingText: 'Registering',
           }} />
 
           {/* Already have an account */}
@@ -174,7 +179,7 @@ export default function SignUpPage() {
             <span className="text-gray-600 text-sm">Already have an account? </span>
             <button
               type="button"
-              onClick={() => router.push('/admin/auth/login')}
+              onClick={() => router.push('/students/auth/login')}
               className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
             >
               Login

@@ -3,10 +3,12 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { BookOpen, BookPlus, Home, Book, Users, Clock, LogOut, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
-import Cpc from '@/../public/cpc-logo.png';
 import { toast } from 'sonner';
-import api from '@/lib/api';
+import { borrowApi } from '@/lib/api'
 import { ButtonSubmit } from '../button';
+import axios from 'axios';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
   const router = useRouter();
@@ -25,7 +27,7 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
 
   const handleLogout = async () => {
     try {
-      const result = await api.get('/api/admins/logout');
+      const result = await axios.get(`${API_BASE_URL}/admins/logout`);
       if (result.data.success) {
         toast.success("Logout Successfully");
 
@@ -40,7 +42,7 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
       }
 
     } catch (error: any) {
-      toast.error(error.response.data.message + "error");
+      toast.error(error.response?.data?.message || "Logout error");
       console.log(error);
       return;
     }
@@ -52,15 +54,14 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
         <div className="mb-8">
           <div className="flex justify-between items-center space-x-3">
               <div className='flex items-center space-x-3'>
-                {/* <BookOpen className="w-8 h-8" /> */}
-                <img src={Cpc.src} alt="Cpc Logo" className="w-10 h-10 border-white border-2 rounded-full"/>
+                <BookOpen className="w-10 h-10 border-white border-2 rounded-full p-1"/>
                 <div>
                   <h2 className="font-bold text-lg">CPC Library</h2>
                   <p className="text-xs text-indigo-300">Admin Panel</p>
                 </div>
               </div>
 
-              <button onClick={props.onClickBtnOpenSideBar}>
+              <button onClick={props.onClickBtnOpenSideBar} aria-label="Toggle sidebar">
                 <ChevronLeft className='w-7 h-7'/>
               </button>
           </div>
@@ -105,16 +106,6 @@ export default function Sidebar(props: { onClickBtnOpenSideBar: () => void }) {
                 >
                   Cancel
                 </button>
-
-                {/* <ButtonSubmit props={{
-                  buttonType="button",
-                  className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700",
-                  submitted={submitted},
-                  btnText="Logout",
-                  btnLoadingText="Logging out",
-                  btnOnClick={handleLogout},
-                }}
-                /> */}
 
                 <ButtonSubmit props={{
                   submitted: submitted,

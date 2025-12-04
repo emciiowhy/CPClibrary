@@ -12,8 +12,6 @@ import {
   Menu,
 } from "lucide-react";
 import { useState } from "react";
-import { button, div } from "framer-motion/client";
-import Cpc from '@/../public/cpc-logo.png';
 
 export default function Header() {
   const router = useRouter();
@@ -39,16 +37,15 @@ export default function Header() {
     <>
       <header className="bg-indigo-900 text-white p-6 flex justify-between items-center px-15 md:hidden">
         <div className="flex items-center space-x-3">
-          {/* <BookOpen className="w-8 h-8"/> */}
-          <img src={Cpc.src} alt="Cpc Logo" className="w-10 h-10 border-white border-2 rounded-full"/>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-semibold">CPC Libray</h1>
-              <p className="text-xs text-indigo-300">Admin Panel</p>
-            </div>
+          <BookOpen className="w-10 h-10 border-white border-2 rounded-full p-1"/>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-semibold">CPC Library</h1>
+            <p className="text-xs text-indigo-300">Admin Panel</p>
+          </div>
         </div>
 
         <nav>
-          <button onClick={() => setOpen(!open)}>
+          <button onClick={() => setOpen(!open)} aria-label="Toggle menu">
             <Menu />
           </button>
 
@@ -70,14 +67,14 @@ export default function Header() {
               ))}
 
               <div className="bottom-6">
-                    <button
-                        onClick={() => setShowLogoutModal(true)}
-                        className="text-xs flex justify-start w-full items-center space-x-3 px-4 py-3 text-red-600"
-                    >
-                        <LogOut className="w-5 h-5" />
-                        <span>Logout</span>
-                    </button>
-                </div>
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className="text-xs flex justify-start w-full items-center space-x-3 px-4 py-3 text-red-600"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
           )}
 
