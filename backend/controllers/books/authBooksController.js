@@ -259,3 +259,44 @@ export const getMyBorrowed = async (req, res) => {
     })
   }
 }
+
+export const scanBorrowQr = async (req, res) => {
+  try {
+    const { qr_data } = req.body;
+
+    if (!qr_data) {
+      return res.status(400).json({
+        message: "Qr data is missing",
+        success: false,
+      })
+    }
+
+    const borrowCodeMatch = qr_data.match(/borrow\s*code\s*:\s*(.+)/i);
+    const borrowCode = borrowCodeMatch ? borrowCodeMatch[1].trim() : null;
+
+    if (!borrowCode) {
+      return res.status(400).json({
+        message: "Invalid QR content",
+        success: false,
+      });
+    };
+
+    const record = await pool.query(`
+      UPDATE borrow_records
+      SET status = 'borrowed'
+      WHERE borrow_code = $1
+    `, [borrowCode]);
+
+    res.json({
+      message: "Qr Verified! Status changed to borrowed",
+      success: true
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Qr scan failed",
+      success: false,
+      error: error.message
+    })
+  }
+}

@@ -29,7 +29,6 @@ export default function SidebarStudent(props: {
     { path: "/students/dashboard", icon: Home, label: "Dashboard" },
     { path: "/students/browse-books", icon: Search, label: "Browse Books" },
     { path: "/students/borrowed-books", icon: Book, label: "Borrowed Books" },
-    { path: "", icon: Bell, label: "Notification" },
   ];
 
   const handleLogout = async () => {

@@ -33,7 +33,6 @@ export default function SidebarAdmin(props: {
     { path: "/admin/members", icon: Users, label: "Students" },
     { path: "/admin/books/add", icon: BookPlus, label: "Add Book" },
     { path: "/admin/borrow", icon: Clock, label: "Borrow Records" },
-    { path: "", icon: Bell, label: "Notification" },
     { path: "/admin/deleted-students", icon: Trash2, label: "Deleted Students"}
   ];
 

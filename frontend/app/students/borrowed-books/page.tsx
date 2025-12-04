@@ -7,7 +7,7 @@ import Sidebar from "@/components/layout/students/SidebarStudent";
 import Header from "@/components/layout/students/HeaderStudent";
 import api from "@/lib/api";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import BorrowQrCode from "@/components/borrow/BorrowQrCode";
 
 interface BorrowedBooks {
@@ -120,8 +120,8 @@ export default function BorrowedBooks() {
                       borrowed.status === "pending" &&
                       <td className="px-5">
                         <Dialog>
-                          <DialogTrigger>
-                            <button onClick={() => borrowed.qr_code}>
+                          <DialogTrigger asChild>
+                            <button>
                               <QrCode className="transition-transform duration-100 hover:scale-[1.05] hover:text-blue-700" />
                             </button>
                           </DialogTrigger>

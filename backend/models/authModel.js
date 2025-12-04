@@ -9,7 +9,7 @@ export const findStudentsByEmail = async (email) => {
 
   const result = await pool.query(query, [email]);
   return result.rows[0]; 
-}
+} 
 
 export const findStudentsBySchoolId = async (schoolId) => {
   const query = `

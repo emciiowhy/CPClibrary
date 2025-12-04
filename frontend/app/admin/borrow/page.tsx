@@ -1,12 +1,14 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, useRef } from "react";
 import Sidebar from "@/components/layout/admin/SidebarAdmin";
 import Header from "@/components/layout/admin/HeaderAdmin";
-import { ChevronRight, MoreVertical } from "lucide-react";
+import { ChevronRight, MoreVertical, ScanQrCode, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import BorrowMoreModal from "@/components/borrow/BorrowMoreModal";
+import ScanBorrowQr, {ScanBorrowQrHandles} from "@/components/ScanBorrowQr";
 
 interface BorrowedHistory {
   borrow_id: number;
@@ -18,7 +20,8 @@ interface BorrowedHistory {
   student_school_id: string;
   book_title: string;
   book_author: string;
-  penalty?: number; // dynamic penalty
+  penalty?: number;
+  qr_code: string;
 }
 
 export default function BorrowBookPage() {
@@ -29,21 +32,24 @@ export default function BorrowBookPage() {
   const [returnedSubmitted, setReturnedSubmitted] = useState(false);
   const [overdueSubmitted, setOverdueSubmitted] = useState(false);
   const [extendDueDateValue, setExtendDueDateValue] = useState("");
+  const [open, setOpen] = useState(false);
+  
+  const scannerRef = useRef<ScanBorrowQrHandles>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
-  // Fetch borrowed records
+  // Fetch borrowed history
   useEffect(() => {
     const getBorrowed = async () => {
       try {
         const response = await api.get("/api/borrowed");
         const data: BorrowedHistory[] = response.data.data;
 
-        // calculate penalty per book dynamically
         const updatedData = data.map((record) => {
           const dueDate = new Date(record.due_date);
           const today = new Date();
           const diffTime = today.getTime() - dueDate.getTime();
           const overdueDays = diffTime > 0 ? Math.floor(diffTime / (1000 * 60 * 60 * 24)) : 0;
-          const penalty = overdueDays * 30; // 30 pesos per day
+          const penalty = overdueDays * 30;
           return { ...record, penalty };
         });
 
@@ -57,7 +63,6 @@ export default function BorrowBookPage() {
     getBorrowed();
   }, []);
 
-  // Set borrow status
   const setStudentBorrowedStatus = async (borrowId: number, borrowedStatus: string) => {
     if (borrowedStatus === "borrowed") setBorrowedSubmitted(true);
     if (borrowedStatus === "returned") setReturnedSubmitted(true);
@@ -66,9 +71,7 @@ export default function BorrowBookPage() {
     try {
       await api.post("/api/admins/set-student-borrowed-status", { borrowedStatus, borrowId });
       toast.success(`Borrow status set to ${borrowedStatus} successfully!`);
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      setTimeout(() => window.location.reload(), 2000);
     } catch (error: any) {
       if (borrowedStatus === "borrowed") setBorrowedSubmitted(false);
       if (borrowedStatus === "returned") setReturnedSubmitted(false);
@@ -79,7 +82,6 @@ export default function BorrowBookPage() {
     }
   };
 
-  // Extend due date
   const extendDueDate = async (borrowId: number) => {
     if (!extendDueDateValue) {
       toast.error("Please select a new due date");
@@ -93,7 +95,6 @@ export default function BorrowBookPage() {
       });
       toast.success(result.data.message);
 
-      // Update state immediately
       setBorrowedHistory((prev) =>
         prev.map((record) =>
           record.borrow_id === borrowId
@@ -103,9 +104,7 @@ export default function BorrowBookPage() {
       );
       setExtendDueDateValue("");
       setExtendSubmitted(false);
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000)
+      setTimeout(() => window.location.reload(), 2000);
     } catch (error: any) {
       setExtendSubmitted(false);
       toast.error("Extending due date failed");
@@ -116,7 +115,9 @@ export default function BorrowBookPage() {
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
       <Header />
-      {openSideBar && <Sidebar onClickBtnOpenSideBar={() => setOpenSideBar(!openSideBar)} />}
+      {openSideBar && (
+        <Sidebar onClickBtnOpenSideBar={() => setOpenSideBar(!openSideBar)} />
+      )}
 
       <main className="flex-1 flex flex-col p-6 bg-gray-100 overflow-y-auto gap-4">
         <div className="flex justify-center items-center flex-row w-fit gap-3 mb-6">
@@ -144,9 +145,9 @@ export default function BorrowBookPage() {
             </div>
 
             <div className="divide-y">
-              {borrowedHistory.map((book, i) => (
+              {borrowedHistory.map((book) => (
                 <div
-                  key={i}
+                  key={book.borrow_id}
                   className="grid grid-cols-1 sm:grid-cols-7 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
                 >
                   <div className="font-semibold text-gray-800">{book.student_name}</div>
@@ -159,7 +160,7 @@ export default function BorrowBookPage() {
                     {new Date(book.due_date).toDateString()}
                   </div>
                   <div
-                    className={`flex font-semibold text-sm border-b p-2 ${
+                    className={`flex font-semibold text-sm ${
                       book.status === "pending"
                         ? "text-gray-700"
                         : book.status === "returned"
@@ -171,10 +172,11 @@ export default function BorrowBookPage() {
                   >
                     {book.status}
                   </div>
-                  <div>
+
+                  <div className="flex flex-row justify-between">
                     <Dialog>
-                      <DialogTrigger>
-                        <MoreVertical className="text-xs transition-transform hover:scale-[1.1]" />
+                      <DialogTrigger asChild>
+                        <MoreHorizontal className="text-xs transition-transform hover:scale-[1.1] cursor-pointer" />
                       </DialogTrigger>
 
                       <BorrowMoreModal
@@ -207,9 +209,41 @@ export default function BorrowBookPage() {
                         onDueDateChange={setExtendDueDateValue}
                         ExtendOnClick={() => extendDueDate(book.borrow_id)}
                         penaltyValue={book.penalty || 0}
-                        isOverDue={book.status === "overdue" ? true : false}
+                        isOverDue={book.status === "overdue"}
                       />
                     </Dialog>
+
+                    {
+                      book.status === "pending"
+                      &&
+                      <Dialog
+                        onOpenChange={(isOpen) => {
+                          if (!isOpen) {
+                            // modal closed → stop camera
+                            scannerRef.current?.clearScanner();
+                          }
+                        }}
+                      >
+                        <DialogTrigger asChild>
+                          <ScanQrCode
+                            className="w-5 h-5 cursor-pointer transition-transform hover:text-indigo-700 hover:scale-[1.05]"
+                            onClick={() => {
+                              setTimeout(() => {
+                                scannerRef.current?.startScanner();
+                              }, 100);
+                            }}
+                          />
+                        </DialogTrigger>
+
+                        <ScanBorrowQr
+                          ref={scannerRef}
+                          onScan={(record) => {
+                            console.log("Borrow record:", record);
+                          }}
+                        />
+                      </Dialog>
+                    }
+
                   </div>
                 </div>
               ))}

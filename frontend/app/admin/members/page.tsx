@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import MemberMoreInfoMenu from "@/components/members/MemberMoreInfoModal";
+import StockProfile from "@/public/StockProfile.jpg"
 
 interface StudentType {
   id: number;
@@ -16,6 +17,7 @@ interface StudentType {
   status: string;
   section: string;
   course: string;
+  profile_url: string;
 }
 
 export default function MembersPage() {
@@ -163,7 +165,11 @@ export default function MembersPage() {
                     >
                       <td className="flex md:block justify-start md:text-center">
                         <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
-                          {student.name.charAt(0)}
+                          <img 
+                            src={student.profile_url || StockProfile.src} 
+                            alt="student profile" 
+                            className="w-20 rounded-full"
+                          />
                         </div>
                       </td>
                       <td>{student.name}</td>
@@ -207,7 +213,11 @@ export default function MembersPage() {
                     >
                       <td className="flex md:block justify-start md:text-center">
                         <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
-                          {student.name.charAt(0)}
+                          <img 
+                            src={student.profile_url || StockProfile.src} 
+                            alt="student profile" 
+                            className="w-20 rounded-full"
+                          />
                         </div>
                       </td>
                       <td>{student.name}</td>

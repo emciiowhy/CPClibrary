@@ -117,7 +117,7 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
             isOverDue &&
             <div>
             <h1 className="font-semibold text-red-600">Penalty</h1>
-            <p className="font-semibold text-red-600">₱{penaltyValue}</p>
+            <p className="font-semibold text-gray-800">₱{penaltyValue}</p>
           </div>
           }
         </div>
