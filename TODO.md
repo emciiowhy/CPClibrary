@@ -4,3 +4,4 @@
 - [ ] Add Fee column to BorrowRecordTable.tsx
 - [ ] Update borrow records API to include fee in responses
 - [ ] Test the feature by returning a book late
+URGENT -- [ ] FIX FAILED TO REGISTER 
