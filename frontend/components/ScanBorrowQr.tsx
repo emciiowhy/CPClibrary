@@ -100,7 +100,7 @@ const startScanner = async () => {
         <div id="qr-reader" style={{ width: 300, height: 300 }}></div>
 
         <DialogFooter>
-          <DialogClose>
+          <DialogClose asChild>
             Close
           </DialogClose>
         </DialogFooter>

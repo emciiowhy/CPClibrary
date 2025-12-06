@@ -9,6 +9,8 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import StockProfile from "@/public/StockProfile.jpg";
 import { ButtonSubmit } from "@/components/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import ChangePassword from "@/components/auth/ChangePassword";
 
 interface StudentType {
   name: string;
@@ -29,10 +31,16 @@ export default function StudentProfile() {
     section: "",
     profile_url: "",
   });
+  
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [openSideBar, setOpenSideBar] = useState(true);
   const [confirm, setConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [changeSubmitted, setChangeSubmitted] = useState(false);
+  const [openChangePass ,setOpenChangePass] = useState<boolean>(false);
 
   //authentication access
   useEffect(() => {
@@ -93,6 +101,35 @@ export default function StudentProfile() {
     }
   };
 
+const handleChangePassword = async (): Promise<boolean> => {
+  setChangeSubmitted(true);
+  try {
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Passwords do not match.");
+      setChangeSubmitted(false);
+      return false;
+    }
+
+    const response = await api.post('/api/students/change-password', {
+      newPassword,
+      currentPassword
+    });
+
+    toast.success(response.data.message);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setChangeSubmitted(false);
+
+    return true;
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Error in changing password");
+    setChangeSubmitted(false);
+    return false;
+  }
+};
+
+
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-gray-100">
       <Header />
@@ -131,11 +168,7 @@ export default function StudentProfile() {
             {/* Clickable Image */}
             <img
               alt="Student Profile"
-              src={
-                profileImage
-                  ? URL.createObjectURL(profileImage) // preview new upload
-                  : student.profile_url || StockProfile.src // use DB image or fallback
-              }
+              src={student.profile_url || process.env.STOCK_PROFILE}
               className={`w-32 h-32 md:w-40 md:h-40 rounded-full border-4 object-cover
               ${
                 confirm ? "cursor-pointer border-indigo-800" : "border-gray-400"
@@ -196,13 +229,30 @@ export default function StudentProfile() {
 
             {/* Change Password Button */}
             <div className={`flex flex-row gap-4`}>
-              <button
-                className="mt-4 w-fit flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
-                onClick={() => router.push("/students/change-password")}
-              >
-                <Lock className="w-4 h-4" />
-                Change Password
-              </button>
+              <Dialog open={openChangePass} onOpenChange={setOpenChangePass}>
+                <DialogTrigger asChild>
+                  <button
+                    className="mt-4 w-fit flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Change Password
+                  </button>
+                </DialogTrigger>
+
+                <ChangePassword
+                  currentPassword={currentPassword}
+                  newPassword={newPassword}
+                  confirmNewPassword={confirmNewPassword}
+                  onChangeCurrent={setCurrentPassword}
+                  onChangeNew={setNewPassword}
+                  onChangeConfirm={setConfirmNewPassword}
+                  onSubmit={handleChangePassword}
+                  submitted={changeSubmitted}
+                  onClose={() => setOpenChangePass(false)} // now this works
+                />
+              </Dialog>
+
+
               {confirm && (
                 <button
                   className="mt-4 w-fit flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"

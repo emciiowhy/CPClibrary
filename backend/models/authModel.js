@@ -55,3 +55,15 @@ export const findBookById = async (id) => {
   const result = await pool.query(query, [id]);
   return result.rows[0];
 }
+
+export const findStudentByBorrowId = async (borrowId) => {
+  const query = 
+  `
+    SELECT * FROM borrow_records
+    WHERE id = $1
+    LIMIT 1
+  `
+
+  const result = await pool.query(query, [borrowId]);
+  return result.rows[0];
+}

@@ -35,6 +35,8 @@ export default function BrowseBook() {
   const router = useRouter();
   const [openSideBar, setOpenSideBar] = useState(true);
   const [books, setBooks] = React.useState<BookType[]>([]);
+  const [searchBook, setSearchBook] = useState('');
+  const [bookCategory, setBookCategory] = useState('');
 
   //authentication access
   useEffect(() => {
@@ -89,6 +91,14 @@ export default function BrowseBook() {
   }
 
   const bookLimitMap = 5;
+  const filteredBook = books.filter((book) => {
+    const matchesSearch = book.title.toLowerCase().includes(searchBook.toLowerCase()) ||
+                          book.author.toLowerCase().includes(searchBook.toLowerCase());
+
+    const matchesCategory = bookCategory === "" || book.courseCategory === bookCategory;
+
+    return matchesSearch && matchesCategory;
+  })
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -118,6 +128,8 @@ export default function BrowseBook() {
                 type="text"
                 placeholder="Search books..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                value={searchBook}
+                onChange={(e) => setSearchBook(e.target.value)}
               />
             </div>
 
@@ -133,6 +145,8 @@ export default function BrowseBook() {
                 name="course_category"
                 id="course_category"
                 className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm min-w-[140px] cursor-pointer hover:bg-gray-100"
+                value={bookCategory}
+                onChange={(e) => setBookCategory(e.target.value)}
               >
                 <option value="" className="text-gray-500">
                   All Categories
@@ -175,7 +189,7 @@ export default function BrowseBook() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
-                {books.slice(0, bookLimitMap).map((book) => (
+                {filteredBook.slice(0, bookLimitMap).map((book) => (
                   <Dialog key={book.id}>
                     <DialogTrigger>
                       <div>

@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Mail, Lock, BookOpen } from 'lucide-react';
 import { useAdmin } from '@/app/context/AdminContext';
-import {AlertModal} from '@/components/alert';
 import { ButtonSubmit } from '@/components/button';
 import { toast } from 'sonner'
 
@@ -18,12 +17,31 @@ export default function SignUpPageAdmin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('info');
-  const [alertMessage, setAlertMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [allowed, setAllowed] = useState<null | boolean>(null);
 
-  //authentication access
+  useEffect(() => {
+    const checkAdminCount = async () => {
+      try {
+        const result = await api.get('/api/secret11182004/count-admin');
+        const count = result.data.adminLength;
+
+        if (count === 0) {
+          setAllowed(true);
+        } else {
+          setAllowed(false);
+        }
+      } catch (error: any) {
+        toast.error("Error in checking admin count");
+        console.log(error);
+        return;
+      }
+    }
+
+    checkAdminCount();
+  }, []);
+
+  //check is naka login naba ka
   useEffect(() => {
     const verifyAdmin = async () => {
       try {
@@ -46,6 +64,14 @@ export default function SignUpPageAdmin() {
 
     verifyAdmin();
   }, []);
+
+  
+  if (allowed === null) return null;
+
+  if (!allowed) {
+    router.replace('/404');
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

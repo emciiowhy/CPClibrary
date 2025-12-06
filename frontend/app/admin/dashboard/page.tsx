@@ -149,11 +149,11 @@ export default function DashboardPage() {
             <tbody>
               {borrowedHistory.slice(0, recentBorrowLimit).map((borrowed, i) => (
                 <tr key={i}>
-                  <td className="text-sm border-b p-2">{borrowed.student_name}</td>
-                  <td className="text-sm border-b p-2">{borrowed.book_title}</td>
+                  <td className="text-sm border-b p-2 font-semibold text-gray-800">{borrowed.student_name}</td>
+                  <td className="text-sm border-b p-2 font-semibold text-gray-800">{borrowed.book_title}</td>
 
-                  <td className="text-sm border-b p-2">{new Date(borrowed.borrow_date).toLocaleDateString()}</td>
-                  <td className="text-sm border-b p-2">{new Date(borrowed.due_date).toLocaleDateString()}</td>
+                  <td className="text-sm border-b p-2">{new Date(borrowed.borrow_date).toDateString()}</td>
+                  <td className="text-sm border-b p-2">{new Date(borrowed.due_date).toDateString()}</td>
                 </tr>
               ))}
             </tbody>

@@ -10,6 +10,7 @@ import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
 import { relations } from "drizzle-orm";
 import { getAllStudents } from "../../models/studentsModel.js";
 import { cloudinary, uploadProfile } from "../../utils/cloudinary.js";
+import mailOptions from "../../utils/transporter.js";
 
 export const fetchStudents = async (req, res) => {
   try {
@@ -116,22 +117,59 @@ export const registerStudentRequestController = async (req, res) => {
       [email, otp, schoolId]
     );
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    mailOptions({
       to: email,
-      subject: "Registration OTP",
-      text: `Your OTP for registration is ${otp}`
-    }
+      subject: "Your Registration OTP",
+      text: `Your OTP is: ${otp}`, 
+      content: `
+        <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registration OTP</title>
+  </head>
+  <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
+    <div style="max-width:600px; margin:auto; background-color:#ffffff; padding:30px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center;">
+      
+      <!-- School Logo -->
+      <img src="https://res.cloudinary.com/dedef9fpx/image/upload/v1764907656/cpc-logo_hq8466.png" 
+           alt="Cordova Public College" 
+           style="width:120px; height:auto; margin-bottom:20px;" />
+      
+      <h2 style="color:#4f46e5; text-align:center;">Registration OTP</h2>
+      
+      <p style="font-size:16px; color:#333333; text-align:left;">Hello,</p>
+      
+      <p style="font-size:16px; color:#333333; text-align:left;">
+        Thank you for registering with Cordova Public College! Please use the OTP below to complete your registration:
+      </p>
+      
+      <div style="text-align:center; margin:20px 0;">
+        <span style="font-size:32px; font-weight:bold; color:#4f46e5; letter-spacing:4px;">
+          ${otp}
+        </span>
+      </div>
+      
+      <p style="font-size:14px; color:#555555; text-align:left;">
+        This OTP is valid for 5 minutes. Please do not share it with anyone.
+      </p>
+      
+      <p style="font-size:14px; color:#555555; text-align:left;">
+        If you did not request this, you can safely ignore this email.
+      </p>
+      
+      <hr style="border:none; border-top:1px solid #eeeeee; margin:20px 0;" />
+      
+      <p style="font-size:12px; color:#999999; text-align:center;">
+        &copy; ${new Date().getFullYear()} Cordova Public College. All rights reserved.
+      </p>
+    </div>
+  </body>
+</html>
 
-    await transporter.sendMail(mailOptions);
+      `
+    })
 
     return res.json({
       message: "OTP sent to you email", 
@@ -280,22 +318,67 @@ export const forgotPasswordStudentsController = async (req, res) => {
       [email, OTP]
     );
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    mailOptions({
       to: email,
-      subject: 'Password Reset OTP',
-      text: `Your OTP for password reset is: ${OTP}`,
-    };
+      subject: "Cordova Public College - Password Reset OTP",
+      text: `Hello,
 
-    await transporter.sendMail(mailOptions);
+      We received a request to reset your password. Your OTP is: ${otp}
+
+      This OTP is valid for 5 minutes. Please do not share it with anyone.
+
+      If you did not request a password reset, you can ignore this email.
+
+      - Cordova Public College`,
+      content: `
+        <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forgot Password OTP</title>
+  </head>
+  <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
+    <div style="max-width:600px; margin:auto; background-color:#ffffff; padding:30px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center;">
+      
+      <!-- School Logo -->
+      <img src="https://res.cloudinary.com/dedef9fpx/image/upload/v1764907656/cpc-logo_hq8466.png" 
+           alt="Cordova Public College" 
+           style="width:120px; height:auto; margin-bottom:20px;" />
+      
+      <h2 style="color:#4f46e5; text-align:center;">Forgot Password OTP</h2>
+      
+      <p style="font-size:16px; color:#333333; text-align:left;">Hello,</p>
+      
+      <p style="font-size:16px; color:#333333; text-align:left;">
+        We received a request to reset your password. Please use the OTP below to reset your password:
+      </p>
+      
+      <div style="text-align:center; margin:20px 0;">
+        <span style="font-size:32px; font-weight:bold; color:#4f46e5; letter-spacing:4px;">
+          ${otp}
+        </span>
+      </div>
+      
+      <p style="font-size:14px; color:#555555; text-align:left;">
+        This OTP is valid for 5 minutes. Please do not share it with anyone.
+      </p>
+      
+      <p style="font-size:14px; color:#555555; text-align:left;">
+        If you did not request a password reset, you can safely ignore this email.
+      </p>
+      
+      <hr style="border:none; border-top:1px solid #eeeeee; margin:20px 0;" />
+      
+      <p style="font-size:12px; color:#999999; text-align:center;">
+        &copy; ${new Date().getFullYear()} Cordova Public College. All rights reserved.
+      </p>
+    </div>
+  </body>
+</html>
+
+      `
+    })
 
     res.json({
       message: "OTP sent to email", 
@@ -494,3 +577,56 @@ export const updateProfile = async (req, res) => {
     })
   }
 }
+
+export const changePassword = async (req, res) => {
+  const refresh_token = req.cookies.refresh_token;
+  if (!refresh_token)
+    return res.status(404).json({ message: "No student" });
+
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const email = req.user.email;
+
+    const student = await findStudentsByEmail(email);
+    if (!student)
+      return res.status(404).json({ message: "Student not found" });
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        message: "The new password must not be identical to the current password.",
+        success: false,
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, student.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Current password is incorrect",
+        success: false,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      `
+      UPDATE students
+      SET password = $1
+      WHERE email = $2;
+      `,
+      [hashedPassword, email]
+    );
+
+    res.json({
+      message: "Password changed successfully!",
+      success: true,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Changing password failed",
+      success: false,
+    });
+  }
+};

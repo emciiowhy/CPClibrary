@@ -18,6 +18,8 @@ export default function ForgotPasswordAdmin() {
   const [submitted, setSubmitted] = useState(false);
   const [otpMessage, setOtpMessage] = useState("Request OTP");
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [allowed, setAllowed] = useState<null | boolean>(null);
+
 
   //authentication access
   useEffect(() => {

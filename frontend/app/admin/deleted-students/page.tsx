@@ -18,6 +18,7 @@ interface DeletedStudentsType {
   section: string;
   course: string;
   profile_url: string;
+  penalty: number;
 }
 
 export default function DeletedStudents() {
@@ -25,6 +26,9 @@ export default function DeletedStudents() {
   const [deletedStudent, setDeletedStudents] = useState<DeletedStudentsType[]>([]);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [searchStudent, setSearchStudent] = useState('');
+  const [searchCourseCategory, setSearchCourseCategory] = useState('');
+  const [searchStudentStatus, setSearchStudentStatus] = useState('')
 
   useEffect(() => {
     const getDeletedStudents = async () => {
@@ -59,6 +63,16 @@ export default function DeletedStudents() {
     }
   }
 
+  const filteredStudents = deletedStudent.filter((student) => {
+    const matchesSearch = student.name.toLowerCase().includes(searchStudent.toLowerCase()) ||
+                          student.student_id.toLowerCase().includes(searchStudent.toLowerCase());
+          
+    const matchesStudentStatusCategory = searchStudentStatus === "" || student.status === searchStudentStatus;
+    const matchesCourseCategory = searchCourseCategory === "" || student.course === searchCourseCategory;
+
+    return matchesSearch && matchesStudentStatusCategory && matchesCourseCategory;
+  })
+
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
       <Header />
@@ -85,33 +99,82 @@ export default function DeletedStudents() {
                 type="text"
                 placeholder="Search students..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                value={searchStudent}
+                onChange={(e) => setSearchStudent(e.target.value)}
               />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+              <label
+                htmlFor="course_category"
+                className="text-sm font-medium text-gray-700 whitespace-nowrap"
+              >
+                Student Status
+              </label>
+              <select
+                name="course_category"
+                id="course_category"
+                className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm min-w-[140px] cursor-pointer hover:bg-gray-100"
+                value={searchStudentStatus}
+                onChange={(e) => setSearchStudentStatus(e.target.value)}
+              >
+                <option value="" className="text-gray-500">
+                  All Statuses
+                </option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+              <label
+                htmlFor="course_category"
+                className="text-sm font-medium text-gray-700 whitespace-nowrap"
+              >
+                Course
+              </label>
+              <select
+                name="course_category"
+                id="course_category"
+                className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm min-w-[140px] cursor-pointer hover:bg-gray-100"
+                value={searchCourseCategory}
+                onChange={(e) => setSearchCourseCategory(e.target.value)}
+              >
+                <option value="" className="text-gray-500">
+                  All Courses
+                </option>
+                <option value="BSIT">BSIT</option>
+                <option value="BSED">BSED</option>
+                <option value="BEED">BEED</option>
+                <option value="BSHM">BSHM</option>
+              </select>
             </div>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow flex-1 flex flex-col">
           <h1 className="text-md text-gray-700 font-bold my-3">
-            All Registered Students
+            All Deleted Students
           </h1>
 
           <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
-            <div className="hidden md:grid grid-cols-7 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
+            <div className="hidden md:grid grid-cols-8 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
               <div>Profile</div>
               <div>Name</div>
               <div>School ID</div>
               <div>Course</div>
               <div>Section</div>
               <div>Status</div>
+              <div>Penalty</div>
               <div>Restore</div>
             </div>
 
             <table>
               <tbody className="divide-y">
-                {deletedStudent.map((student, i) => (
+                {filteredStudents.map((student, i) => (
                     <tr
                       key={student.id}
-                      className="grid grid-cols-1 sm:grid-cols-7 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                      className="grid grid-cols-1 sm:grid-cols-8 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
                     >
                       <td className="flex md:block justify-start md:text-center">
                         <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
@@ -122,8 +185,8 @@ export default function DeletedStudents() {
                           />
                         </div>
                       </td>
-                      <td>{student.name}</td>
-                      <td>{student.student_id}</td>
+                      <td className="text-gray-800 font-semibold">{student.name}</td>
+                      <td className="text-gray-800 font-semibold">{student.student_id}</td>
                       <td className={`font-semibold text-blue-600`}>
                         {student.course}
                       </td>
@@ -131,6 +194,7 @@ export default function DeletedStudents() {
                         {student.section}
                       </td>
                       <td className={`font-semibold ${student.status === "active" ? "text-green-600" : "text-gray-400"}`}>{student.status}</td>
+                      <td className={`font-semibold ${student.penalty ? "text-red-600" : "text-gray-400"}`}>{student.penalty > 0 ? "₱" + student.penalty : "none"}</td>
                       <td>
                         <Dialog>
                           <DialogTrigger onClick={() => setEmail(student.email)}>

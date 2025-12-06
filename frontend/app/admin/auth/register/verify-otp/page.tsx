@@ -12,9 +12,37 @@ import { toast } from "sonner";
 export default function VerifyOtpPageAdmin() {
   const router = useRouter();
   const { admin, clearAdminData } = useAdmin();
-
   const [otp, setOtp] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [allowed, setAllowed] = useState<null | boolean>(null);
+
+  useEffect(() => {
+    const checkAdminCount = async () => {
+      try {
+        const result = await api.get('/api/secret11182004/count-admin');
+        const count = result.data.adminLength;
+
+        if (count === 0) {
+          setAllowed(true);
+        } else {
+          setAllowed(false);
+        }
+      } catch (error: any) {
+        toast.error("Error in checking admin count");
+        console.log(error);
+        return;
+      }
+    }
+
+    checkAdminCount();
+  }, []);
+
+  if (allowed === null) return null;
+
+  if (!allowed) {
+    router.replace('/404');
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

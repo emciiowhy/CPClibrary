@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Deleted Notification</title>
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
+  <div style="max-width:600px; margin:auto; background-color:#ffffff; padding:30px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center;">
+    
+    <!-- School Logo -->
+    <img src="https://res.cloudinary.com/dedef9fpx/image/upload/v1764907656/cpc-logo_hq8466.png" 
+         alt="Cordova Public College" 
+         style="width:120px; height:auto; margin-bottom:20px;" />
+    
+    <h2 style="color:#E53E3E; text-align:center;">Account Deleted</h2>
+    
+    <p style="font-size:16px; color:#333333; text-align:left;">Hello,</p>
+    
+    <p style="font-size:16px; color:#333333; text-align:left;">
+      We want to inform you that your account has been <span style="font-weight: bold; color:red">deleted</span> from our system.
+    </p>
+    
+    <!-- Reason for deletion -->
+    <p style="font-size:16px; color:#333333; text-align:left;">
+      <strong>Reason:</strong> ${reason}
+    </p>
+    
+    <p style="font-size:16px; color:#333333; text-align:left;">
+      If you wish to recover your account, you can do so by either:
+    </p>
+    
+    <ul style="font-size:16px; color:#333333; text-align:left; margin-left:20px;">
+      <li>Contacting the library directly.</li>
+      <li>Submitting a recovery request through our email: 
+        <a href="mailto:jersonjaybonghanoy@gmail.com" style="color:#E53E3E; text-decoration:none;">library@cordova.edu.ph</a>
+      </li>
+    </ul>
+    
+    <p style="font-size:16px; color:#333333; text-align:left;">
+      Please ensure you take the appropriate steps if you want to regain access to your account.
+    </p>
+    
+    <hr style="border:none; border-top:1px solid #eeeeee; margin:20px 0;">
+    
+    <p style="font-size:12px; color:#999999; text-align:center;">
+      &copy; ${new Date().getFullYear()} Cordova Public College. All rights reserved.
+    </p>
+    
+  </div>
+</body>
+</html>

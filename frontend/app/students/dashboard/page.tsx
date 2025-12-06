@@ -14,10 +14,21 @@ interface BorrowedBooks {
   borrow_date: string;
   due_date: string;
   status: string;
+  penalty?: number;
+}
+
+interface StudentType {
+  penalty: number;
 }
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  const [borrowedBooks, setBorrowedBooks] = useState<BorrowedBooks[]>([]);
+  const [openSideBar, setOpenSideBar] = useState(true);
+  const recentLimit = 3;
+  const [student, setStudent] = useState<StudentType | null>(null);
+
   //authentication access
   useEffect(() => {
     const verifyStudent = async () => {
@@ -39,15 +50,15 @@ export default function DashboardPage() {
     verifyStudent();
   }, []);
 
-  const [borrowedBooks, setBorrowedBooks] = useState<BorrowedBooks[]>([]);
-  const [openSideBar, setOpenSideBar] = useState(true);
-  const recentLimit = 3;
-
   useEffect(() => {
     const getMyBorrowed = async () => {
       try {
         const result = await api.get('/api/books/my-borrowed');
-        setBorrowedBooks(result.data.borrowed)
+        setBorrowedBooks(result.data.borrowed);
+
+        const user = await api.get('/api/students/find');
+        setStudent(user.data.student);
+
       } catch (error: any) {
         toast.error(error.response.data.message)
         console.log(error);
@@ -79,11 +90,12 @@ export default function DashboardPage() {
     },
     {
       title: "Fines",
-      text: "P" + (borrowedBooks.filter(b => b.status === "overdue").length * 20),
+      text: `₱ ${student?.penalty ?? 0}`,
       icon: <CreditCard />,
       bookClassName: "text-yellow-700",
     }
   ];
+
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -134,9 +146,17 @@ export default function DashboardPage() {
                   <td className="text-sm border-b p-2">{new Date(record.borrow_date).toLocaleDateString()}</td>
 
                   <td className="text-sm border-b p-2">{new Date(record.due_date).toLocaleDateString()}</td>
-                  <td className={`font-semibold text-sm border-b p-2 text-blue-700 
-                    ${ record.status == "Returned" ? "text-green-700" : "text-blue-700"} 
-                    ${ record.status == "Overdue" ? "text-red-700" : "text-blue-700"}`}>{record.status}</td>
+                  <td className={`font-semibold text-sm border-b p-2 ${
+                    record.status === "borrowed"
+                      ? "text-blue-700"
+                      : record.status === "returned"
+                      ? "text-green-700"
+                      : record.status === "overdue"
+                      ? "text-red-700"
+                      : "text-gray-700"
+                  }`}>
+                    {record.status}
+                  </td>
                 </tr>
               ))}
             </tbody>

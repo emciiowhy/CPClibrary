@@ -18,8 +18,28 @@ export default function LoginPageAdmin() {
   const [password, setPassword] = useState('');
   const {admin, setAdminData, clearAdminData} = useAdmin();
   const [submitted, setSubmitted] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
-  //authentication access
+  useEffect(() => {
+    const countAdmin = async () => {
+      try {
+        const result = await api.get('/api/secret11182004/count-admin');
+
+        if (result.data.adminLength === 0) {
+          setShowRegister(true);
+        }
+
+      } catch (error: any) {
+        toast.error("Error count admin");
+        console.log(error);
+        return;
+      }
+    }
+
+    countAdmin();
+  }, [])
+
+  //check if naka log in naba
   useEffect(() => {
     const verifyAdmin = async () => {
       try {
@@ -137,7 +157,9 @@ export default function LoginPageAdmin() {
           
 
           {/* Sign Up Link */}
-          <div className="text-center">
+          {
+            showRegister &&
+            <div className="text-center">
             <span className="text-gray-600 text-sm">Don’t have an account? </span>
             <button
               type="button"
@@ -147,6 +169,7 @@ export default function LoginPageAdmin() {
               Sign Up
             </button>
           </div>
+          }
         </form>
       </div>
     </div>

@@ -53,7 +53,7 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
                   submitted: borrowedSubmitted,
                   buttonType: "submit",
                   className:
-                    "bg-blue-600 hover:bg-blue-700 text-white rounded-lg",
+                    "bg-indigo-700 hover:bg-blue-800 text-white rounded-lg transition-transform hover:scale-[1.05]",
                   btnText: "Set To Borrowed",
                   btnLoadingText: "Setting To Borrowed",
                   btnOnClick: BorrowedOnClick
@@ -65,7 +65,7 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
                   submitted: returnedSubmitted,
                   buttonType: "submit",
                   className:
-                    "bg-green-600 hover:bg-green-700 text-white rounded-lg",
+                    "bg-green-700 hover:bg-green-800 text-white rounded-lg transition-transform hover:scale-[1.05]",
                   btnText: "Set To Returned",
                   btnLoadingText: "Setting To Returned",
                   btnOnClick: ReturnedOnClick
@@ -77,7 +77,7 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
                   submitted: overdueSubmitted,
                   buttonType: "submit",
                   className:
-                    "bg-red-600 hover:bg-red-700 text-white rounded-lg",
+                    "bg-red-700 hover:bg-red-800 text-white rounded-lg transition-transform hover:scale-[1.05]",
                   btnText: "Set To Overdue",
                   btnLoadingText: "Setting To Overdue",
                   btnOnClick: OverdueOnClick
@@ -104,7 +104,7 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
                   submitted: extendSubmitted,
                   buttonType: "submit",
                   className:
-                    "bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg",
+                    "bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg transition-transform hover:scale-[1.05]",
                   btnText: "Extend",
                   btnLoadingText: "Extending",
                   btnOnClick: ExtendOnClick,
@@ -113,13 +113,12 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
             </div>
           </div>
 
-          {
-            isOverDue &&
+
             <div>
-            <h1 className="font-semibold text-red-600">Penalty</h1>
+            <h1 className="font-semibold text-red-600">Student's Penalty</h1>
             <p className="font-semibold text-gray-800">₱{penaltyValue}</p>
           </div>
-          }
+
         </div>
 
 
