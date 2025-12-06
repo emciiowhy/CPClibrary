@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Lock } from 'lucide-react';
@@ -16,6 +16,30 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const { setStudentData} = useStudent();
+
+  //authentication access
+  useEffect(() => {
+    const verifyStudent = async () => {
+      try {
+        const result = await api.get('api/check-token');
+        if (result.data.decoded.role === "student") {
+          toast.success(result.data.message);
+          router.push('/students/dashboard');
+        }
+
+        if (result.data.decoded.role === "admin") {
+          toast.success(result.data.message);
+          router.push('/admin/dashboard');
+        }
+
+      } catch (error: any) {
+        console.log(error);
+        return;
+      }
+    };
+
+    verifyStudent();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

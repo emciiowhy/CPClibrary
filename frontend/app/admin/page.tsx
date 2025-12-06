@@ -4,4 +4,3 @@ export default function AdminIndex() {
 	redirect("/admin/auth/login");
 }
 
-

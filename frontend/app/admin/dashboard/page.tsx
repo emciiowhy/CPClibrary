@@ -9,35 +9,89 @@ import {
   ChevronRight,
   PanelRightClose,
 } from "lucide-react";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
-import { useBooks } from "@/hooks/useBooks";
-import { useMembers } from "@/hooks/useMembers";
-import { useBorrow } from "@/hooks/useBorrow";
+import Sidebar from "@/components/layout/admin/SidebarAdmin";
+import Header from "@/components/layout/admin/HeaderAdmin";
+import api from "@/lib/api";
+import { toast } from "sonner";
+
+interface BorrowRecord {
+  id: number;
+  studentName: string;
+  bookTitle: string;
+  dateIssued: string;
+  dueDate: string;
+}
+
+interface BorrowedHistory {
+  borrow_id: number;
+  borrow_code: string;
+  borrow_date: string;
+  due_date: string;
+  status: string;
+  student_name: string;
+  student_school_id: string;
+  book_title: string;
+  book_author: string;
+}
 
 export default function DashboardPage() {
-  const { books } = useBooks();
-  const { members } = useMembers();
-  const { borrowRecords, borrowStats } = useBorrow();
-
+  const router = useRouter();
   const [stats, setStats] = useState({
     totalBooks: 0,
     totalMembers: 0,
     borrowedBooks: 0,
   });
 
+  const [borrowedHistory, setBorrowedHistory] = useState<BorrowedHistory[]>([]);
+
   useEffect(() => {
-    setStats({
-      totalBooks: books.length,
-      totalMembers: members.length,
-      borrowedBooks: borrowStats.totalBorrowed,
-    });
-  }, [books.length, members.length, borrowStats.totalBorrowed]);
+    const verifyAdmin = async () => {
+      try {
+        const result = await api.get('api/admins/verify-admin');
+        if (!result.data.success) {
+          toast.error("Login First");
+          console.log("error ari sa if");
+          router.push('/admin/auth/login');
+        }
 
-  // Get recent borrow records (last 5)
-  const recentRecords = borrowRecords.slice(0, 5);
+      } catch (error: any) {
+        toast.error(error.response.data.message);
+        console.log(error);
+        router.push('/admin/auth/login');
+        return;
+      }
+    };
 
+    verifyAdmin();
+  });
+
+  useEffect(() => {
+    const getBooks = async () => {
+      try {
+        const books = await api.get('/api/books');
+        const students = await api.get('/api/students');
+        const borrowed = await api.get('/api/borrowed');
+        setBorrowedHistory(borrowed.data.data);
+
+        setStats({
+          totalBooks: books.data.length,
+          totalMembers: students.data.length,
+          borrowedBooks: borrowed.data.data.length,
+        });
+
+      } catch (error) {
+        toast.error("Error in getting books");
+        console.log("Error getting books " + error);
+        return;
+      }
+    }
+
+    getBooks();
+  }, [])
+
+  const [recentRecords, setRecentRecords] = useState<BorrowRecord[]>([]);
   const [openSideBar, setOpenSideBar] = useState(true);
+  const recentBorrowLimit = 5;
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -93,26 +147,15 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {recentRecords.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-sm text-center py-4 text-gray-500">
-                    No recent borrow records
-                  </td>
+              {borrowedHistory.slice(0, recentBorrowLimit).map((borrowed, i) => (
+                <tr key={i}>
+                  <td className="text-sm border-b p-2">{borrowed.student_name}</td>
+                  <td className="text-sm border-b p-2">{borrowed.book_title}</td>
+
+                  <td className="text-sm border-b p-2">{new Date(borrowed.borrow_date).toLocaleDateString()}</td>
+                  <td className="text-sm border-b p-2">{new Date(borrowed.due_date).toLocaleDateString()}</td>
                 </tr>
-              ) : (
-                recentRecords.map((record) => (
-                  <tr key={record.id}>
-                    <td className="text-sm border-b p-2">{record.memberName}</td>
-                    <td className="text-sm border-b p-2">{record.bookTitle}</td>
-                    <td className="text-sm border-b p-2">
-                      {new Date(record.issueDate).toLocaleDateString()}
-                    </td>
-                    <td className="text-sm border-b p-2">
-                      {new Date(record.dueDate).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>

@@ -1,25 +1,90 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
-import { ChevronRight, Search, PanelRightClose, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useMembers } from "@/hooks/useMembers";
-import Link from "next/link";
+import Sidebar from "@/components/layout/admin/SidebarAdmin";
+import Header from "@/components/layout/admin/HeaderAdmin";
+import { Search, PanelRightClose, MoreVertical } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/lib/api";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import MemberMoreInfoMenu from "@/components/members/MemberMoreInfoModal";
+import StockProfile from "@/public/StockProfile.jpg"
+
+interface StudentType {
+  id: number;
+  name: string;
+  email: string;
+  student_id: string;
+  status: string;
+  section: string;
+  course: string;
+  profile_url: string;
+}
 
 export default function MembersPage() {
   const [openSideBar, setOpenSideBar] = React.useState(true);
-  const { members, loading, error } = useMembers();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
 
-  // Filter members based on search
-  const filteredMembers = members.filter((member) => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  const [recentRegisteredStudents, setRecentRegisteredStudents] = React.useState<StudentType[]>([]);
+  const [recentLimit, setRecentLimit] = useState(3);
+  const [students, setStudents] = React.useState<StudentType[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [deleteModalOpen, setDeleteModal] = useState(false);
+
+  useEffect(() => {
+    const getStudents = async () => {
+      try {
+        const response = await api.get('/api/students');
+
+        setStudents(response.data);
+        console.log(students);
+      } catch (error) {
+        toast.error("Error getting students");
+        console.log("Error getting students member page " + error);
+        return;
+      }
+    }
+
+    getStudents();
+  }, [])
+
+  const handleDeact = async (email: string) => {
+    try {
+      const status = 'inactive';
+      const result = await api.post('/api/admins/change-status', {status, email});
+      toast.success(result.data.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } catch (error: any) {
+      toast.error(error);
+      console.log(error);
+    }
+  }
+
+  const handleActivate = async (email: string) => {
+    try {
+      const status = 'active';
+      const result = await api.post('/api/admins/change-status', {status, email});
+      toast.success(result.data.message);
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.response.data.message || "Error");
+      console.log(error);
+    }
+  }
+
+  const handleDelete = async (email: string, reason: string) => {
+    try {
+      const result = await api.post('/api/admins/delete-student', {reason, email});
+
+      toast.success(result.data.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error: any) {
+      toast.error(error.response.message || "Error");
+      console.log(error);
+    }
+  }
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -46,18 +111,9 @@ export default function MembersPage() {
               <input
                 type="text"
                 placeholder="Search students..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
               />
             </div>
-
-            <Link href="/members/add">
-              <Button className="flex items-center gap-2">
-                <UserPlus className="w-4 h-4" />
-                Add Member
-              </Button>
-            </Link>
 
             <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
               <label
@@ -84,57 +140,112 @@ export default function MembersPage() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow flex-1 flex flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-md text-gray-700 font-bold">All Members</h1>
-            <span className="text-sm text-gray-500">{filteredMembers.length} members</span>
-          </div>
+          <h1 className="text-md text-gray-700 font-bold my-3">
+            Recent Registered
+          </h1>
 
           <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
-            <div className="hidden md:grid grid-cols-4 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
+            <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
               <div>Profile</div>
               <div>Name</div>
-              <div>Student ID</div>
-              <div>Email</div>
+              <div>School ID</div>
+              <div>Course</div>
+              <div>Section</div>
+              <div>Status</div>
             </div>
 
-            <div className="divide-y flex-1 overflow-y-auto">
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="ml-2 text-gray-500">Loading members...</span>
-                </div>
-              ) : error ? (
-                <div className="flex items-center justify-center py-8">
-                  <span className="text-red-500">{error}</span>
-                </div>
-              ) : filteredMembers.length === 0 ? (
-                <div className="flex items-center justify-center py-8">
-                  <span className="text-gray-500">No members found</span>
-                </div>
-              ) : (
-                filteredMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="grid grid-cols-1 sm:grid-cols-4 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
-                  >
-                    <div className="flex md:block justify-start md:text-center">
-                      <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center font-medium text-white">
-                        {member.name.charAt(0).toUpperCase()}
-                      </div>
-                    </div>
+            <table>
+              <tbody className="divide-y">
+                {students
+                  .slice(0, recentLimit)
+                .map((student) => (
+                    <tr
+                      key={student.id}
+                      className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                    >
+                      <td className="flex md:block justify-start md:text-center">
+                        <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
+                          <img 
+                            src={student.profile_url || StockProfile.src} 
+                            alt="student profile" 
+                            className="w-20 rounded-full"
+                          />
+                        </div>
+                      </td>
+                      <td>{student.name}</td>
+                      <td>{student.student_id}</td>
+                      <td className="font-semibold text-blue-600">
+                        {student.course}
+                      </td>
+                      <td className={`font-semibold ${student.section === 'not set' ? 'text-gray-400' : 'text-blue-600'}`}>
+                        {student.section}
+                      </td>
+                      <td className={`font-semibold ${student.status === "active" ? "text-green-600" : "text-gray-400"}`}>{student.status}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-                    <div className="font-medium">{member.name}</div>
-                    <div className="text-blue-600 font-semibold">{member.studentId}</div>
-                    <div className="text-gray-600">{member.email}</div>
-                  </div>
-                ))
-              )}
+        <div className="bg-white p-6 rounded-lg shadow flex-1 flex flex-col">
+          <h1 className="text-md text-gray-700 font-bold my-3">
+            All Registered Students
+          </h1>
+
+          <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
+            <div className="hidden md:grid grid-cols-7 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
+              <div>Profile</div>
+              <div>Name</div>
+              <div>School ID</div>
+              <div>Course</div>
+              <div>Section</div>
+              <div>Status</div>
+              <div>More</div>
             </div>
+
+            <table>
+              <tbody className="divide-y">
+                {students.map((student, i) => (
+                    <tr
+                      key={student.id}
+                      className="grid grid-cols-1 sm:grid-cols-7 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                    >
+                      <td className="flex md:block justify-start md:text-center">
+                        <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center font-medium text-gray-700">
+                          <img 
+                            src={student.profile_url || StockProfile.src} 
+                            alt="student profile" 
+                            className="w-20 rounded-full"
+                          />
+                        </div>
+                      </td>
+                      <td>{student.name}</td>
+                      <td>{student.student_id}</td>
+                      <td className={`font-semibold text-blue-600`}>
+                        {student.course}
+                      </td>
+                      <td className={`font-semibold ${student.section === 'not set' ? 'text-gray-400' : 'text-blue-600'}`}>
+                        {student.section}
+                      </td>
+                      <td className={`font-semibold ${student.status === "active" ? "text-green-600" : "text-gray-400"}`}>{student.status}</td>
+                      <td>
+                        <MemberMoreInfoMenu 
+                          submitted={submitted}
+                          studentStatus={student.status}
+                          deacOnClick={() => handleDeact(student.email)}
+                          activateOnClick={() => handleActivate(student.email)}
+                          deleteOnClick={(reason: string) => handleDelete(student.email, reason)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </main>
     </div>
   );
 }
-
 

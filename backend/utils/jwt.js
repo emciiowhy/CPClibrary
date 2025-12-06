@@ -17,4 +17,3 @@ export const generateRefreshToken = (payload) => {
   const secret = getSecret("REFRESH_TOKEN", "MY_REFRESH_TOKEN");
   return jwt.sign(payload, secret, { expiresIn: "7d" });
 };
-

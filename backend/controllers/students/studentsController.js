@@ -1,4 +1,3 @@
-// backend/controllers/students/studentsController.js
 import { getAllStudents, registerStudents} from '../../models/studentsModel.js';
 
 export const registerStudentsController = async (req, res) => {
@@ -36,4 +35,3 @@ export const registerStudentsController = async (req, res) => {
     });
   }
 };
-

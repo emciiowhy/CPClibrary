@@ -1,14 +1,17 @@
-// backend/controllers/admins/authAdminsController.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { findAdminsByEmail, findStudentsByEmail } from "../../models/authModel.js";
+import {
+  findAdminsByEmail,
+  findStudentsByEmail,
+  findAdminsById,
+  findStudentsBySchoolId,
+} from "../../models/authModel.js";
 import { getAllAdmins } from "../../models/adminsModel.js";
-import dotenv from "dotenv";
-dotenv.config();
 import nodemailer from "nodemailer";
 import { generateOTP } from "../../utils/otpGenerator.js";
 import { pool } from "../../db.js";
-import { generateAccessToken } from "../../utils/jwt.js";
+import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
+import { findBookById } from "../../models/authModel.js";
 
 export const fetchAdmins = async (req, res) => {
   try {
@@ -24,30 +27,32 @@ export const loginAdminController = async (req, res) => {
   try {
     const { email, password } = req.body;
     const admin = await findAdminsByEmail(email);
-    if (!admin) return res.status(401).json({ 
-      message: "Invalid email",
-      success: false
-    });
+    if (!admin)
+      return res.status(401).json({
+        message: "Invalid email",
+        success: false,
+      });
 
     const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) return res.status(401).json({ 
-      message: "Invalid password",
-      success: false
+    if (!isMatch)
+      return res.status(401).json({
+        message: "Invalid password",
+        success: false,
+      });
+
+    const accessToken = generateAccessToken({
+      id: admin.id,
+      email: admin.email,
+      role: admin.role,
     });
 
-    // const token = jwt.sign(
-    //   { id: admin.id, email: admin.email, role: admin.role },
-    //   process.env.MY_SECRET_KEY,
-    //   { expiresIn: "1hr" }
-    // );
+    const refreshToken = generateRefreshToken({
+      id: admin.id,
+      email: admin.email,
+      role: admin.role,
+    });
 
-    const token = generateAccessToken({
-      id: admin.id, 
-      email: admin.email, 
-      role: admin.role
-    })
-
-    res.cookie("token", token, {
+    res.cookie("access_token", accessToken, {
       httpOnly: true,
       // secure: process.env.NODE_ENV === "development", // Only send over HTTPS in production
       secure: false,
@@ -55,9 +60,15 @@ export const loginAdminController = async (req, res) => {
       maxAge: 5 * 60 * 1000,
     });
 
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.json({
       message: "Login Successfully",
-      token,
       success: true,
       admin: {
         id: admin.id,
@@ -66,9 +77,12 @@ export const loginAdminController = async (req, res) => {
         role: admin.role,
       },
     });
-    
   } catch (error) {
-    res.status(500).json({ message: "Login error", error: error.message });
+    res.status(500).json({
+      message: "Login error",
+      error: error.message,
+      success: false,
+    });
   }
 };
 
@@ -118,7 +132,6 @@ export const registerAdminRequestController = async (req, res) => {
       success: true,
       otp,
     });
-    
   } catch (error) {
     return res.status(500).json({
       message: "Failed to request register",
@@ -208,7 +221,6 @@ export const finalRegisterAdminController = async (req, res) => {
       admin: newAdmin.rows[0],
       success: true,
     });
-
   } catch (error) {
     res.status(500).json({
       message: "Failed to register admin",
@@ -222,7 +234,7 @@ export const forgotPasswordAdminController = async (req, res) => {
     const { email } = req.body;
 
     const user = await findAdminsByEmail(email);
-    if (!user) return res.status(404).json({message: "Email not found"});
+    if (!user) return res.status(404).json({ message: "Email not found" });
 
     const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -247,33 +259,32 @@ export const forgotPasswordAdminController = async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Password Reset OTP',
+      subject: "Password Reset OTP",
       text: `Your OTP for password reset is: ${OTP}`,
-    }
+    };
 
     await transporter.sendMail(mailOptions);
 
     res.json({
-      message: "OTP sent to your email", 
+      message: "OTP sent to your email",
       otp: OTP,
-      success: true
+      success: true,
     });
-
   } catch (error) {
     return res.status(500).json({
-      message: "Error in forgot password", 
+      message: "Error in forgot password",
       error: error.message,
-      success: false
+      success: false,
     });
   }
-}
+};
 
 export const resetPasswordAdminController = async (req, res) => {
   try {
     const { email, otp, password } = req.body;
 
     const user = await findAdminsByEmail(email);
-    if (!user) return res.status(404).json({message: "Email not found"});
+    if (!user) return res.status(404).json({ message: "Email not found" });
 
     const otpRecord = await pool.query(
       `
@@ -290,7 +301,7 @@ export const resetPasswordAdminController = async (req, res) => {
     }
 
     if (otpRecord.rows[0].otp !== otp) {
-      return res.status(400).json({message: "Invalid OTP"});
+      return res.status(400).json({ message: "Invalid OTP" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -308,26 +319,34 @@ export const resetPasswordAdminController = async (req, res) => {
       `
         DELETE FROM admin_otps
         WHERE email = $1
-      `, [email]
+      `,
+      [email]
     );
 
     return res.json({
-      message: "Password reset successful", 
-      success: true
+      message: "Password reset successful",
+      success: true,
     });
-
   } catch (error) {
     return res.status(500).json({
-      message: "Error in reset password", 
+      message: "Error in reset password",
       error: error.message,
-      success: false
+      success: false,
     });
   }
-}
+};
 
 export const logoutAdmin = async (req, res) => {
   try {
-    res.cookie("token", "", {
+    res.cookie("access_token", "", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 0,
+      path: "/",
+    });
+
+    res.cookie("refresh_token", "", {
       httpOnly: true,
       secure: false,
       sameSite: "Lax",
@@ -338,14 +357,248 @@ export const logoutAdmin = async (req, res) => {
     res.status(200).json({
       message: "Logged out successfully!",
       success: true,
-      role: "admin"
+      role: "admin",
     });
-
   } catch (error) {
     return res.status(500).json({
       message: "Logout failed",
       error: error.message,
       success: false,
     });
+  }
+};
+
+export const getAdminRole = async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({
+      message: "User not found",
+      success: false,
+    });
+  }
+
+  try {
+    const admin = await findAdminsById(user.id);
+    if (!admin) {
+      return res.status(401).json({
+        message: "Admin based on Id not found",
+        success: false,
+      });
+    }
+
+    res.status(200).json({
+      message: "Admin has been found",
+      success: true,
+      admin,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to get admin role",
+      success: false,
+    });
+  }
+};
+
+export const changeStatus = async (req, res) => {
+  try {
+    const { status, email } = req.body;
+    const student = findStudentsByEmail(email);
+
+    await pool.query(
+      `
+          UPDATE students
+          SET status = $1
+          WHERE email = $2;
+        `,
+      [status, email]
+    );
+
+    res.json({
+      message: `Successfully changed ${student.name}'s status to ${status}`,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error in changing status",
+      success: false,
+    });
+  }
+};
+
+export const deleteStudent = async (req, res) => {
+  try {
+    const { email, reason } = req.body;
+    const student = await findStudentsByEmail(email);
+
+    await pool.query('BEGIN');
+
+    await pool.query(
+      `
+      INSERT INTO deleted_students 
+        (name, email, student_id, course, section, status, password, role, profile_url, profile_public_id, delete_reason) 
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, $11)
+    `,
+      [
+        student.name,
+        student.email,
+        student.student_id,
+        student.course,
+        student.section,
+        student.status,
+        student.password,
+        student.role,
+        student.profile_url,
+        student.profile_public_id,
+        reason
+      ]
+    );
+
+    await pool.query(
+      `
+        DELETE FROM students WHERE email = $1;
+      `,
+      [email]
+    );
+
+    await pool.query("COMMIT");
+
+    res.json({
+      message: `Student ${student.name} has been deleted successfully.`,
+    });
+    
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error deleting student",
+      error: error.message,
+    });
+  } finally {
+    client.release();
+  }
+};
+
+export const restoreStudent = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { email, reason } = req.body;
+
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const { rows } = await client.query(
+      'SELECT * FROM deleted_students WHERE email = $1',
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Student not found in deleted records" });
+    }
+
+    const student = rows[0];
+
+    await client.query('BEGIN');
+
+    await client.query(`
+      INSERT INTO students 
+        (name, email, student_id, course, section, status, password, role, profile_url, profile_public_id, restore_reason)
+      VALUES ($1,$2,$3,$4,$5,'active',$6,$7,$8,$9,$10)
+      ON CONFLICT (email) DO UPDATE
+        SET status = 'active',
+            restore_reason = EXCLUDED.restore_reason
+      RETURNING *
+    `, [
+      student.name,
+      student.email,
+      student.student_id,
+      student.course || 'not set',
+      student.section || 'not set',
+      student.password,
+      student.role || 'student',
+      student.profile_url,
+      student.profile_public_id,
+      reason || 'restored'
+    ]);
+
+    await client.query('DELETE FROM deleted_students WHERE email = $1', [email]);
+
+    await client.query('COMMIT');
+
+    res.status(200).json({
+      message: `Student ${student.name} has been restored successfully.`,
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Restore student error:', error);
+    res.status(500).json({
+      message: "Restoring student failed",
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+};
+
+export const getDeletedStudents = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT * FROM deleted_students
+    `);
+
+    res.json({
+      students: result.rows,
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: error,
+    })
+  }
+}
+
+export const setStudentBorrowedStatus = async (req, res) => {
+  try {
+    const { borrowedStatus, borrowId } = req.body;
+
+    const query = `
+      UPDATE borrow_records
+      SET status = $1
+      WHERE id = $2
+    `;
+
+    await pool.query(query, [borrowedStatus, borrowId]);
+
+    res.json({
+      message: "Set status to " + borrowedStatus + " successfully",
+      success: true,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error setting student borrowed status",
+      error: error,
+    })
+  }
+}
+
+export const extendDueDate = async (req, res) => {
+  try {
+    const { borrowId, extendDueDateValue } = req.body;
+
+    await pool.query(`
+      UPDATE borrow_records
+      SET due_date = $1
+      WHERE id = $2;
+    `, [extendDueDateValue, borrowId]);
+
+    res.json({
+      message: "Extend due date successfully",
+      success: true,
+    });
+    
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      success: false,
+    })
   }
 }

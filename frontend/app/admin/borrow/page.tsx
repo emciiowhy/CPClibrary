@@ -1,18 +1,116 @@
 "use client";
-import React, { useEffect } from "react";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
-import { ChevronRight, BookOpen, AlertCircle } from "lucide-react";
-import { useBorrow } from "@/hooks/useBorrow";
-import { BorrowRecord } from "@/types/borrow";
+
+import React, { useEffect, useState, useRef } from "react";
+import Sidebar from "@/components/layout/admin/SidebarAdmin";
+import Header from "@/components/layout/admin/HeaderAdmin";
+import { ChevronRight, MoreVertical, ScanQrCode, MoreHorizontal } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/lib/api";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import ScanBorrowQr, {ScanBorrowQrHandles} from "@/components/ScanBorrowQr";
+
+interface BorrowedHistory {
+  borrow_id: number;
+  borrow_code: string;
+  borrow_date: string;
+  due_date: string;
+  status: string;
+  student_name: string;
+  student_school_id: string;
+  book_title: string;
+  book_author: string;
+  penalty?: number;
+  qr_code: string;
+}
 
 export default function BorrowBookPage() {
-  const [openSideBar, setOpenSideBar] = React.useState(true);
-  const { borrowRecords, loading, error, fetchBorrowRecords } = useBorrow();
+  const [openSideBar, setOpenSideBar] = useState(true);
+  const [borrowedHistory, setBorrowedHistory] = useState<BorrowedHistory[]>([]);
+  const [extendSubmitted, setExtendSubmitted] = useState(false);
+  const [borrowedSubmitted, setBorrowedSubmitted] = useState(false);
+  const [returnedSubmitted, setReturnedSubmitted] = useState(false);
+  const [overdueSubmitted, setOverdueSubmitted] = useState(false);
+  const [extendDueDateValue, setExtendDueDateValue] = useState("");
+  const [open, setOpen] = useState(false);
+  
+  const scannerRef = useRef<ScanBorrowQrHandles>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
+  // Fetch borrowed history
   useEffect(() => {
-    fetchBorrowRecords();
+    const getBorrowed = async () => {
+      try {
+        const response = await api.get("/api/borrowed");
+        const data: BorrowedHistory[] = response.data.data;
+
+        const updatedData = data.map((record) => {
+          const dueDate = new Date(record.due_date);
+          const today = new Date();
+          const diffTime = today.getTime() - dueDate.getTime();
+          const overdueDays = diffTime > 0 ? Math.floor(diffTime / (1000 * 60 * 60 * 24)) : 0;
+          const penalty = overdueDays * 30;
+          return { ...record, penalty };
+        });
+
+        setBorrowedHistory(updatedData);
+      } catch (error) {
+        toast.error("Error in getting all borrowed history");
+        console.log(error);
+      }
+    };
+
+    getBorrowed();
   }, []);
+
+  const setStudentBorrowedStatus = async (borrowId: number, borrowedStatus: string) => {
+    if (borrowedStatus === "borrowed") setBorrowedSubmitted(true);
+    if (borrowedStatus === "returned") setReturnedSubmitted(true);
+    if (borrowedStatus === "overdue") setOverdueSubmitted(true);
+
+    try {
+      await api.post("/api/admins/set-student-borrowed-status", { borrowedStatus, borrowId });
+      toast.success(`Borrow status set to ${borrowedStatus} successfully!`);
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error: any) {
+      if (borrowedStatus === "borrowed") setBorrowedSubmitted(false);
+      if (borrowedStatus === "returned") setReturnedSubmitted(false);
+      if (borrowedStatus === "overdue") setOverdueSubmitted(false);
+
+      toast.error("Error in setting book status");
+      console.log(error);
+    }
+  };
+
+  const extendDueDate = async (borrowId: number) => {
+    if (!extendDueDateValue) {
+      toast.error("Please select a new due date");
+      return;
+    }
+    setExtendSubmitted(true);
+    try {
+      const result = await api.post("/api/admins/extend-duedate", {
+        borrowId,
+        extendDueDateValue,
+      });
+      toast.success(result.data.message);
+
+      setBorrowedHistory((prev) =>
+        prev.map((record) =>
+          record.borrow_id === borrowId
+            ? { ...record, due_date: extendDueDateValue }
+            : record
+        )
+      );
+      setExtendDueDateValue("");
+      setExtendSubmitted(false);
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error: any) {
+      setExtendSubmitted(false);
+      toast.error("Extending due date failed");
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
       <Header />
@@ -32,61 +130,89 @@ export default function BorrowBookPage() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow flex-1 flex flex-col">
-          <h1 className="text-md text-gray-700 font-bold my-3">
-            Recent
-          </h1>
+          <h1 className="text-md text-gray-700 font-bold my-3">Recent</h1>
 
           <div className="w-full overflow-hidden rounded-lg border flex-1 flex flex-col">
-            <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
+            <div className="hidden md:grid grid-cols-7 gap-4 px-4 py-3 bg-gray-100 border-b text-sm font-semibold text-gray-700">
               <div>Name</div>
               <div>Student ID</div>
               <div>Book Borrowed</div>
               <div>Date</div>
               <div>Due Date</div>
               <div>Status</div>
+              <div>More</div>
             </div>
 
             <div className="divide-y">
-              {loading ? (
-                <div className="px-4 py-8 text-center text-gray-500">
-                  Loading borrow records...
+              {borrowedHistory.map((book) => (
+                <div
+                  key={book.borrow_id}
+                  className="grid grid-cols-1 sm:grid-cols-7 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
+                >
+                  <div className="font-semibold text-gray-800">{book.student_name}</div>
+                  <div className="font-semibold text-gray-800">{book.student_school_id}</div>
+                  <div className="font-semibold text-gray-800">{book.book_title}</div>
+                  <div className="text-gray-700">
+                    {new Date(book.borrow_date).toDateString()}
+                  </div>
+                  <div className="font-semibold text-red-700">
+                    {new Date(book.due_date).toDateString()}
+                  </div>
+                  <div
+                    className={`flex font-semibold text-sm ${
+                      book.status === "pending"
+                        ? "text-gray-700"
+                        : book.status === "returned"
+                        ? "text-green-700"
+                        : book.status === "overdue"
+                        ? "text-red-700"
+                        : "text-blue-700"
+                    }`}
+                  >
+                    {book.status}
+                  </div>
+
+                  <div className="flex flex-row justify-between">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <MoreHorizontal className="text-xs transition-transform hover:scale-[1.1] cursor-pointer" />
+                      </DialogTrigger>
+                    </Dialog>
+
+                    {
+                      book.status === "pending"
+                      &&
+                      <Dialog
+                        onOpenChange={(isOpen) => {
+                          if (!isOpen) {
+                            // modal closed → stop camera
+                            scannerRef.current?.clearScanner();
+                          }
+                        }}
+                      >
+                        <DialogTrigger asChild>
+                          <ScanQrCode
+                            className="w-5 h-5 cursor-pointer transition-transform hover:text-indigo-700 hover:scale-[1.05]"
+                            onClick={() => {
+                              setTimeout(() => {
+                                scannerRef.current?.startScanner();
+                              }, 100);
+                            }}
+                          />
+                        </DialogTrigger>
+
+                        <ScanBorrowQr
+                          ref={scannerRef}
+                          onScan={(record) => {
+                            console.log("Borrow record:", record);
+                          }}
+                        />
+                      </Dialog>
+                    }
+
+                  </div>
                 </div>
-              ) : error ? (
-                <div className="px-4 py-8 text-center text-red-500 flex items-center justify-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
-                </div>
-              ) : borrowRecords.length === 0 ? (
-                <div className="px-4 py-8 text-center text-gray-500">
-                  No borrow records found
-                </div>
-              ) : (
-                borrowRecords
-                  .slice(0, 10)
-                  .map((record: BorrowRecord) => (
-                    <div
-                      key={record.id}
-                      className="grid grid-cols-1 sm:grid-cols-6 gap-4 px-4 py-3 hover:bg-gray-50 transition-all text-sm items-center"
-                    >
-                      <div>{record.memberName}</div>
-                      <div>{record.studentId}</div>
-                      <div>{record.bookTitle}</div>
-                      <div>{new Date(record.issueDate).toLocaleDateString()}</div>
-                      <div>{new Date(record.dueDate).toLocaleDateString()}</div>
-                      <div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          record.status === 'borrowed'
-                            ? 'bg-blue-100 text-blue-800'
-                            : record.status === 'returned'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {record.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-              )}
+              ))}
             </div>
           </div>
         </div>
@@ -94,5 +220,3 @@ export default function BorrowBookPage() {
     </div>
   );
 }
-
-

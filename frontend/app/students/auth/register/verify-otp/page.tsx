@@ -1,4 +1,3 @@
-// frontend/app/students/auth/register/verify-otp/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -30,21 +29,18 @@ export default function VerifyOtpPageStudent() {
       return;
     }
 
-    const { email, name, password, schoolId } = student;
+    const { email, name, password, schoolId, course } = student;
 
     try {
-      // Step 1: Verify OTP
       const verifyResponse = await api.post("/api/students/register/verify-otp", { email, otp, schoolId });
 
-      // Axios treats status >= 400 as error, so this only runs for 2xx
       if (!verifyResponse.data.success) {
         toast.error("OTP verification failed: " + (verifyResponse.data.message || "Please try again."));
         setSubmitted(false);
         return;
       }
 
-      // Step 2: Final registration
-      const finalResponse = await api.post("/api/students/register/final-register", { name, email, password, schoolId });
+      const finalResponse = await api.post("/api/students/register/final-register", { name, email, password, schoolId, course });
 
       if (finalResponse.data.success) {
         toast.success("Registration successful! Redirecting to login...");
@@ -55,7 +51,6 @@ export default function VerifyOtpPageStudent() {
         setSubmitted(false);
       }
     } catch (error: any) {
-      // Axios error handling
       toast.warning(error.response?.data?.message || error.message || "Network error. Please try again.");
       setSubmitted(false);
     }

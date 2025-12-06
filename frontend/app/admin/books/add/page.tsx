@@ -1,73 +1,68 @@
 "use client";
 import React, { useState } from "react";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
-import { ChevronRight, BookOpen, AlertCircle, CheckCircle } from "lucide-react";
+import Sidebar from "@/components/layout/admin/SidebarAdmin";
+import Header from "@/components/layout/admin/HeaderAdmin";
+import { ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import api from "@/lib/api";
+import { desc } from "framer-motion/client";
+import {toast} from "sonner";
+import { ButtonSubmit } from "@/components/button";
 import { Button } from "@/components/ui/button";
-import { useBooks } from "@/hooks/useBooks";
-import { addBookSchema, AddBookFormData } from "@/lib/validations";
 
 export default function AddBookPage() {
   const [openSideBar, setOpenSideBar] = React.useState(true);
-  const { addBook, loading, error, clearError } = useBooks();
 
-  const [formData, setFormData] = useState({
-    title: '',
-    author: '',
-    isbn: '',
-    description: '',
-    year: '',
-    copies: '',
-  });
-  const [success, setSuccess] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear validation error when user starts typing
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-
-    const result = addBookSchema.safeParse(formData);
-    if (!result.success) {
-      result.error.issues.forEach((error) => {
-        errors[error.path[0] as string] = error.message;
-      });
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+  const [bookTitle, setBookTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [year, setYear] = useState(0);
+  const [description, setDescription] = useState("");
+  const [copies, setCopies] = useState(0);
+  const [image, setImage] = useState<File | null>(null);
+  const [course, setCourse] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
+    setSubmitted(true);
     try {
-      await addBook(formData);
-      setSuccess(true);
-      setFormData({
-        title: '',
-        author: '',
-        isbn: '',
-        description: '',
-        year: '',
-        copies: '',
-      });
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      // Error is handled by the hook
+      const formData = new FormData();
+      formData.append("bookTitle", bookTitle);
+      formData.append("author", author);
+      formData.append("year", String(year));
+      formData.append("description", description);
+      formData.append("copies", String(copies));
+      formData.append("course", course);
+      if (image) formData.append("image", image);
+
+      const response = await api.post('/api/books/add', formData, {
+        headers: {
+          "Content-Type" : "multipart/form-data"
+        }
+      }
+    );
+
+    setSubmitted(false);
+    toast.success("Book added successfully!");
+    console.log(response.data);
+
+    setBookTitle("");
+    setAuthor("");
+    setYear(0);
+    setDescription("");
+    setCopies(0);
+    setImage(null);
+    setCourse("");
+      
+    } catch(error) {
+      setSubmitted(false);
+      console.log("Error submit");
+      toast.error("Error adding book");
     }
-  };
+  }
+
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -87,152 +82,97 @@ export default function AddBookPage() {
           <h1 className="text-2xl font-bold">Add Book</h1>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center gap-2 mb-6">
-            <BookOpen className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold">Add New Book</h2>
+        <form className="bg-white p-6 rounded-lg shadow" onSubmit={handleSubmit}>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-3 md:gap-6">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="input_bookTitle">Book Title</Label>
+              <Input 
+                id="input_bookTitle" 
+                type="text"
+                value={bookTitle}
+                onChange={(e) => setBookTitle(e.target.value)}
+                required />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="input_bookAuthor">Author</Label>
+              <Input 
+                id="input_bookAuthor" 
+                type="text"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                required />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="input_bookYear">Year</Label>
+              <Input 
+                id="input_bookYear" 
+                type="number" 
+                value={year}
+                onChange={(e) => setYear(Number(e.target.value))}
+                required />
+            </div>
+
+            <div className="flex flex-col md:col-span-3 gap-2">
+              <Label htmlFor="input_bookDesc">Description</Label>
+              <Input 
+                id="input_bookDesc" 
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="picture">Book Photo</Label>
+              <Input 
+                id="picture" 
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(((e.target) as HTMLInputElement).files?.[0] || null)}
+                />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="copies">Copies</Label>
+              <Input 
+                id="copies" 
+                type="number" 
+                value={copies}
+                onChange={(e) => setCopies(Number(e.target.value))}
+                required />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="copies">Course</Label>
+              <select 
+                aria-label="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                value={course}
+                onChange={(e) => setCourse(e.target.value)}
+                >
+                <option value="">All Categories</option>
+                <option value="BSIT">BSIT</option>
+                <option value="BSED">BSED</option>
+                <option value="BEED">BEED</option>
+                <option value="BSHM">BSHM</option>
+              </select>
+            </div>
           </div>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-500" />
-              <span className="text-sm text-red-700">{error}</span>
-              <button
-                onClick={clearError}
-                className="ml-auto text-red-500 hover:text-red-700"
-              >
-                ×
-              </button>
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span className="text-sm text-green-700">Book added successfully!</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-3 md:gap-6">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="title">Book Title *</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  type="text"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  required
-                />
-                {validationErrors.title && (
-                  <p className="text-xs text-red-500">{validationErrors.title}</p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="author">Author *</Label>
-                <Input
-                  id="author"
-                  name="author"
-                  type="text"
-                  value={formData.author}
-                  onChange={handleInputChange}
-                  required
-                />
-                {validationErrors.author && (
-                  <p className="text-xs text-red-500">{validationErrors.author}</p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="isbn">ISBN *</Label>
-                <Input
-                  id="isbn"
-                  name="isbn"
-                  type="text"
-                  value={formData.isbn}
-                  onChange={handleInputChange}
-                  placeholder="10 or 13 digits"
-                  required
-                />
-                {validationErrors.isbn && (
-                  <p className="text-xs text-red-500">{validationErrors.isbn}</p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="year">Year</Label>
-                <Input
-                  id="year"
-                  name="year"
-                  type="text"
-                  value={formData.year}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 2023"
-                />
-                {validationErrors.year && (
-                  <p className="text-xs text-red-500">{validationErrors.year}</p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="copies">Copies</Label>
-                <Input
-                  id="copies"
-                  name="copies"
-                  type="number"
-                  value={formData.copies}
-                  onChange={handleInputChange}
-                  placeholder="1"
-                  min="1"
-                />
-                {validationErrors.copies && (
-                  <p className="text-xs text-red-500">{validationErrors.copies}</p>
-                )}
-              </div>
-
-              <div className="flex flex-col md:col-span-3 gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  name="description"
-                  type="text"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Optional book description"
-                />
-                {validationErrors.description && (
-                  <p className="text-xs text-red-500">{validationErrors.description}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-10">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-blue-800 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Adding Book...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
-                    Add Book
-                  </div>
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
+          <div className="mt-10">
+            <ButtonSubmit props={{
+              submitted: submitted,
+              buttonType: 'submit',
+              className: 'text-md w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors',
+              btnText: 'Submit',
+              btnLoadingText: 'Submitting',
+            }} />
+          </div>
+        </form>
       </main>
     </div>
   );
 }
-
 
 
