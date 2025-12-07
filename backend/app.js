@@ -14,7 +14,7 @@ app.use(morgan("dev"));
 app.use(cors({
   origin: [
     "http://localhost:3000",
-    "https://cpc-library-management-system.onrender.com"
+    "https://cpc-library-management-system.vercel.app/",
   ],
   credentials: true,
 }));
