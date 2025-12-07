@@ -21,7 +21,7 @@ app.use(cors({
 app.use(cookieParser());
 
 app.get('/', (req, res) => {
-  res("hi");
+  res.send("hi");
 })
 
 app.use('/api', studentsRoutes);
