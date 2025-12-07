@@ -12,7 +12,10 @@ const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "https://cpc-library-management-system.onrender.com"
+  ],
   credentials: true,
 }));
 app.use(cookieParser());
