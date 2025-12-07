@@ -8,50 +8,73 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-b from-white to-indigo-100 flex items-center justify-center p-6">
       <motion.div
-        className="text-center"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center border border-gray-200"
       >
-        {/* === Logo Section === */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="bg-white p-4 rounded-full shadow-lg">
-            <Image
-              src="/cpc logo.png"
-              alt="Cordova Public College Logo"
-              width={120}
-              height={120}
-              className="rounded-full object-contain"
-              priority
-            />
-          </div>
-        </div>
+        {/* Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <Image
+            src="/cpc logo.png"
+            alt="Cordova Public College Logo"
+            width={110}
+            height={110}
+            className="rounded-full shadow-md"
+            priority
+          />
+        </motion.div>
 
-        {/* === Title & Tagline === */}
-        <h1 className="text-5xl font-extrabold text-gray-800 mb-3">
+        {/* Title */}
+        <motion.h1
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-2xl font-bold text-gray-800 text-center"
+        >
           Cordova Public College
-        </h1>
-        <p className="text-lg text-gray-600 mb-10 tracking-wide">
-          Library System Management
-        </p>
+        </motion.h1>
 
-        {/* === Buttons === */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="text-gray-600 text-center mb-8"
+        >
+          Library Management System
+        </motion.p>
+
+        {/* Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="w-full flex flex-col gap-4"
+        >
           <button
             onClick={() => router.push("/students/auth/login")}
-            className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg"
+            className="w-full px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold 
+                       shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all"
           >
             Login
           </button>
+
           <button
             onClick={() => router.push("/students/auth/register")}
-            className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all border-2 border-indigo-600 shadow-md hover:shadow-lg"
+            className="w-full px-6 py-3 rounded-xl border border-indigo-500 
+                       text-indigo-600 bg-white font-semibold shadow-md 
+                       hover:bg-gray-50 hover:shadow-lg transition-all"
           >
             Sign Up
           </button>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );
