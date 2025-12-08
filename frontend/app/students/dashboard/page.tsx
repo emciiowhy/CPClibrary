@@ -8,6 +8,7 @@ import Header from "@/components/layout/students/HeaderStudent";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { StatsCardModal } from "@/components/dashboard/StatsCard";
+import { div } from "framer-motion/client";
 
 interface BorrowedBooks {
   book_title: string;
@@ -117,13 +118,15 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <StatsCardModal 
+            <div key={index}>
+              <StatsCardModal
               title={stat.title}
               text={stat.text}
               icon={stat.icon}
               bookClassName={stat.bookClassName}
               titleClassName={stat.bookClassName}
             />
+            </div>
           ))}
         </div>
 

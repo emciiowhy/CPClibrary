@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080',
+  baseURL: process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BACKEND_URL : 'http://localhost:8080',
   withCredentials: true, // send cookies automatically
   headers: { 'Content-Type': 'application/json' },
 });
@@ -11,7 +11,7 @@ const api = axios.create({
 const refreshAcessToken = async () => {
   try {
     await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/refresh-token`,
+      `${process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BACKEND_URL : 'http://localhost:8080'}/api/refresh-token`,
       { withCredentials: true } // cookie sent automatically
     );
     

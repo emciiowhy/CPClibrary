@@ -130,6 +130,7 @@ export const registerStudentRequestController = async (req, res) => {
 
     try {
       await mailOptions({
+        from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
         to: email,
         subject: "Your Registration OTP",
         text: `Your OTP is: ${otp}`, 
@@ -340,7 +341,7 @@ export const forgotPasswordStudentsController = async (req, res) => {
     
 
     await resend.emails.send({
-      from: process.env.EMAIL_USER,
+      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
       to: email,
       subject: "Cordova Public College - Password Reset OTP",
       text: `Hello,
@@ -478,16 +479,16 @@ export const logoutStudent = async (req, res) => {
   try {
     res.cookie("access_token", "", {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAMESITE || "Lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 0,
       path: "/",
     });
 
     res.cookie("refresh_token", "", {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAMESITE || "Lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 0,
       path: "/",
     })

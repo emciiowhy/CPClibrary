@@ -119,6 +119,7 @@ export const registerAdminRequestController = async (req, res) => {
     );
 
     mailOptions({
+      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
       to: email,
       subject: "Your Registration OTP",
       text: `Your OTP is: ${otp}`, 
@@ -295,6 +296,7 @@ export const forgotPasswordAdminController = async (req, res) => {
 
    try {
     await mailOptions({
+      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
       to: email,
       subject: "Cordova Public College - Admin Password Reset OTP",
       text: `
