@@ -189,12 +189,12 @@ export const refreshToken = async (req, res) => {
       });
     }
 
-    if (!result.rows[0]) {
-      return res.status(403).json({
-        message: "Invalid refresh token",
-        success: false,
-      });
-    }
+    // if (!result.rows[0]) {
+    //   return res.status(403).json({
+    //     message: "Invalid refresh token",
+    //     success: false,
+    //   });
+    // }
 
     const newAccessToken = generateAccessToken({ 
       id: decoded.id, 
@@ -216,10 +216,15 @@ export const refreshToken = async (req, res) => {
     console.log("Access token refreshed");
 
   } catch (error) {
-    return res.status(500).json({
+    // return res.status(500).json({
+    //   message: "Refresh token invalid or expired",
+    //   success: false,
+    // });
+
+    return res.json({
       message: "Refresh token invalid or expired",
       success: false,
-    });
+    })
   }
 };
 
