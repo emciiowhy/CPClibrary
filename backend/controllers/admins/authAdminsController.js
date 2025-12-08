@@ -57,15 +57,15 @@ export const loginAdminController = async (req, res) => {
     res.cookie("access_token", accessToken, {
       httpOnly: true,
       // secure: process.env.NODE_ENV === "development", // Only send over HTTPS in production
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: process.env.COOKIE_SAMESITE || "Lax",
       maxAge: 5 * 60 * 1000,
     });
 
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: process.env.COOKIE_SAMESITE || "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -426,16 +426,16 @@ export const logoutAdmin = async (req, res) => {
   try {
     res.cookie("access_token", "", {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: process.env.COOKIE_SAMESITE || "Lax",
       maxAge: 0,
       path: "/",
     });
 
     res.cookie("refresh_token", "", {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: process.env.COOKIE_SAMESITE || "Lax",
       maxAge: 0,
       path: "/",
     });

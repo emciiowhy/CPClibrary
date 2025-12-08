@@ -52,15 +52,15 @@ export const loginStudentController = async (req, res) => {
 
      res.cookie('access_token', accessToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "None", //'lax',
+        secure: process.env.COOKIE_SECURE === "true",
+        sameSite: process.env.COOKIE_SAMESITE || "Lax",
         maxAge: 5 * 60 * 1000,
     });
 
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None", //"lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: process.env.COOKIE_SAMESITE || "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
@@ -457,16 +457,16 @@ export const logoutStudent = async (req, res) => {
   try {
     res.cookie("access_token", "", {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: process.env.COOKIE_SAMESITE || "Lax",
       maxAge: 0,
       path: "/",
     });
 
     res.cookie("refresh_token", "", {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: process.env.COOKIE_SAMESITE || "Lax",
       maxAge: 0,
       path: "/",
     })
