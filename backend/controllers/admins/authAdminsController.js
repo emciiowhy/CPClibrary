@@ -287,7 +287,8 @@ export const forgotPasswordAdminController = async (req, res) => {
       [email, OTP]
     );
 
-    mailOptions({
+   try {
+    await mailOptions({
       to: email,
       subject: "Cordova Public College - Admin Password Reset OTP",
       text: `
@@ -349,7 +350,14 @@ export const forgotPasswordAdminController = async (req, res) => {
 </html>
 
       `
-    })
+    });
+   } catch (error) {
+    console.error("Error sending email:", err.message);
+    return res.status(500).json({
+      message: "Failed to send OTP email. Please try again later.",
+      success: false
+    });
+   }
 
     res.json({
       message: "OTP sent to your email",
