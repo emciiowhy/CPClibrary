@@ -173,7 +173,7 @@ export const registerStudentRequestController = async (req, res) => {
         `
       });
     } catch (error) {
-      console.error("Error sending email:", err.message);
+      console.error("Error sending email:", error.message);
       return res.status(500).json({
         message: "Failed to send OTP email. Please try again later.",
         success: false
