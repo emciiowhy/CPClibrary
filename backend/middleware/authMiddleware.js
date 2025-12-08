@@ -203,8 +203,8 @@ export const refreshToken = async (req, res) => {
 
     res.cookie("access_token", newAccessToken, {
       httpOnly: true,
-      sameSite: "Lax",
-      secure: false,
+      sameSite: "None" ,//"Lax",
+      secure: true,
       maxAge: 5 * 60 * 1000,
     });
 
@@ -234,8 +234,8 @@ export const redirectUser = async (req, res) => {
       decoded,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Error redirecting user",
+    return res.status(401).json({
+      message: "Invalid or missing token",
       success: false,
     })
   }

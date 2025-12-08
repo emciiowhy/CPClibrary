@@ -24,7 +24,7 @@ export default function ForgotPasswordStudent() {
   useEffect(() => {
     const verifyStudent = async () => {
       try {
-        const result = await api.get('api/check-token');
+        const result = await api.get('/api/check-token');
         if (result.data.decoded.role === "student") {
           toast.success(result.data.message);
           router.push('/students/dashboard');

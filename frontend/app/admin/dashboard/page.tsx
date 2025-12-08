@@ -47,7 +47,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const verifyAdmin = async () => {
       try {
-        const result = await api.get('api/admins/verify-admin');
+        const result = await api.get('/api/admins/verify-admin');
         if (!result.data.success) {
           toast.error("Login First");
           console.log("error ari sa if");

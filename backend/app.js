@@ -15,6 +15,7 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://cpc-library-management-system.vercel.app",
+    "https://cpc-library-management-system.onrender.com",
   ],
   credentials: true,
 }));

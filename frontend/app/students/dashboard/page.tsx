@@ -33,7 +33,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const verifyStudent = async () => {
       try {
-        const result = await api.get('api/students/verify-student');
+        const result = await api.get('/api/students/verify-student');
         if (!result.data.success) {
           toast.error("Login First");
           router.push('/students/auth/login');
