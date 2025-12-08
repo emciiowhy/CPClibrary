@@ -26,12 +26,16 @@ export default function SignUpPage() {
     const verifyStudent = async () => {
       try {
         const result = await api.get('/api/check-token');
-        if (result.data.decoded.role === "student") {
+        const role = result.data?.decoded?.role;
+
+        if (!role) return;
+
+        if (role === "student") {
           toast.success(result.data.message);
           router.push('/students/dashboard');
         }
 
-        if (result.data.decoded.role === "admin") {
+        if (role === "admin") {
           toast.success(result.data.message);
           router.push('/admin/dashboard');
         }
@@ -56,7 +60,7 @@ export default function SignUpPage() {
     }
 
     try {
-      const response = await api.post('api/students/register/request', {name, schoolId, email, password, course});
+      const response = await api.post('/api/students/register/request', {name, schoolId, email, password, course});
       if (response.data.success) {
         toast.success(response.data.message || "Registration successful! Please check your email for OTP.");
 
@@ -69,7 +73,7 @@ export default function SignUpPage() {
         })
 
         router.push('/students/auth/register/verify-otp');
-      } 
+      }
 
     } catch (error: any) {
       setSubmitted(false);

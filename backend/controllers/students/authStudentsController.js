@@ -11,6 +11,11 @@ import { relations } from "drizzle-orm";
 import { getAllStudents } from "../../models/studentsModel.js";
 import { cloudinary, uploadProfile } from "../../utils/cloudinary.js";
 import mailOptions from "../../utils/transporter.js";
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export const fetchStudents = async (req, res) => {
   try {
@@ -50,19 +55,24 @@ export const loginStudentController = async (req, res) => {
       role: user.role,
     })
 
-     res.cookie('access_token', accessToken, {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE === "true",
-        sameSite: process.env.COOKIE_SAMESITE || "Lax",
-        maxAge: 5 * 60 * 1000,
-    });
-
-    res.cookie('refresh_token', refreshToken, {
+    const accessCookieOptions = {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAMESITE || "Lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 5 * 60 * 1000,
+      path: "/",
+    };
+
+    const refreshCookieOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
+      path: "/",
+    };
+
+    res.cookie("access_token", accessToken, accessCookieOptions);
+    res.cookie("refresh_token", refreshToken, refreshCookieOptions);
 
     // res.setHeader('Authorization', `Bearer ${token}`);  
     
@@ -327,12 +337,15 @@ export const forgotPasswordStudentsController = async (req, res) => {
       [email, OTP]
     );
 
-    mailOptions({
+    
+
+    await resend.emails.send({
+      from: process.env.EMAIL_USER,
       to: email,
       subject: "Cordova Public College - Password Reset OTP",
       text: `Hello,
 
-      We received a request to reset your password. Your OTP is: ${otp}
+      We received a request to reset your password. Your OTP is: ${OTP}
 
       This OTP is valid for 5 minutes. Please do not share it with anyone.
 
@@ -365,7 +378,7 @@ export const forgotPasswordStudentsController = async (req, res) => {
       
       <div style="text-align:center; margin:20px 0;">
         <span style="font-size:32px; font-weight:bold; color:#4f46e5; letter-spacing:4px;">
-          ${otp}
+          ${OTP}
         </span>
       </div>
       

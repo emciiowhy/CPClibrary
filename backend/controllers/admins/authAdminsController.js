@@ -25,6 +25,8 @@ export const fetchAdmins = async (req, res) => {
   }
 };
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export const loginAdminController = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -54,20 +56,24 @@ export const loginAdminController = async (req, res) => {
       role: admin.role,
     });
 
-    res.cookie("access_token", accessToken, {
+    const accessCookieOptions = {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "development", // Only send over HTTPS in production
-      secure: process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAMESITE || "Lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 5 * 60 * 1000,
-    });
+      path: "/",
+    };
 
-    res.cookie("refresh_token", refreshToken, {
+    const refreshCookieOptions = {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAMESITE || "Lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+      path: "/",
+    };
+
+    res.cookie("access_token", accessToken, accessCookieOptions);
+    res.cookie("refresh_token", refreshToken, refreshCookieOptions);
 
     res.json({
       message: "Login Successfully",

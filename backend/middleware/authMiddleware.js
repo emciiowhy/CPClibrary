@@ -14,6 +14,7 @@ const getSecret = (primary, fallback) => {
 
 const getAccessSecret = () => getSecret("ACCESS_TOKEN", "MY_SECRET_KEY");
 const getRefreshSecret = () => getSecret("REFRESH_TOKEN", "MY_REFRESH_TOKEN");
+const isProduction = process.env.NODE_ENV === "production";
 
 export const jwtAuthenticate = (req, res, next) => {
   const access_token = req.cookies.access_token;
@@ -196,17 +197,20 @@ export const refreshToken = async (req, res) => {
     //   });
     // }
 
-    const newAccessToken = generateAccessToken({ 
-      id: decoded.id, 
-      role: decoded.role 
+    const newAccessToken = generateAccessToken({
+      id: decoded.id,
+      role: decoded.role,
     });
 
-    res.cookie("access_token", newAccessToken, {
+    const accessCookieOptions = {
       httpOnly: true,
-      sameSite: "None" ,//"Lax",
-      secure: true,
+      sameSite: isProduction ? "None" : "Lax",
+      secure: isProduction,
       maxAge: 5 * 60 * 1000,
-    });
+      path: "/",
+    };
+
+    res.cookie("access_token", newAccessToken, accessCookieOptions);
 
     res.json({
       message: "Access token refreshed",
