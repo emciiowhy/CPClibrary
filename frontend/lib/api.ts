@@ -11,7 +11,7 @@ const api = axios.create({
 const refreshAcessToken = async () => {
   try {
     await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/refresh-token`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'} api/refresh-token`,
       { withCredentials: true } // cookie sent automatically
     );
     
