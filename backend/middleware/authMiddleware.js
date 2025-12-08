@@ -234,8 +234,8 @@ export const redirectUser = async (req, res) => {
       decoded,
     });
   } catch (error) {
-    return res.status(401).json({
-      message: "Invalid or missing token",
+    return res.json({
+      message: "Student Not Logged In",
       success: false,
     })
   }
