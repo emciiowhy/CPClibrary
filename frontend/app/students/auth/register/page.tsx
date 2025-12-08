@@ -213,7 +213,7 @@ export default function SignUpPage() {
             buttonType: 'submit',
             className: 'text-md w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors',
             btnText: 'Register',
-            btnLoadingText: 'Registiring',
+            btnLoadingText: 'Registering',
           }} />
 
           {/* Already have an account */}
