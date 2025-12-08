@@ -8,14 +8,19 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-const mailOptions = ({from, to, content, subject, text }) => {
-  transporter.sendMail({
-    from: from || process.env.EMAIL_USER,
-    to: to,
-    subject: subject,
-    text: text,
-    html: content,
-  });
+const mailOptions = async ({from, to, content, subject, text }) => {
+  try {
+    await transporter.sendMail({
+      from: from || process.env.EMAIL_USER,
+      to,
+      subject,
+      text,
+      html: content,
+    });
+  } catch (error) {
+    console.error("Failed to send email: ", error.message);
+    throw new Error("Email sending failed");
+  }
 };
 
 export default mailOptions;
