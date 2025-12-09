@@ -32,7 +32,7 @@ isProduction
 const mailOptions = async ({ from, to, content, subject, text }) => {
   try {
     await transporter.sendMail({
-      from: isProduction ? "" : process.env.EMAIL_USER,
+      from,
       to,
       subject,
       text,
