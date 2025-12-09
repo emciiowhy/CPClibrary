@@ -340,7 +340,7 @@ export const forgotPasswordStudentsController = async (req, res) => {
 
     
 
-    await resend.emails.send({
+    await mailOptions({
       from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
       to: email,
       subject: "Cordova Public College - Password Reset OTP",

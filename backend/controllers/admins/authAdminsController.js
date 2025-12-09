@@ -442,16 +442,16 @@ export const logoutAdmin = async (req, res) => {
   try {
     res.cookie("access_token", "", {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAMESITE || "Lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 0,
       path: "/",
     });
 
     res.cookie("refresh_token", "", {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAMESITE || "Lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       maxAge: 0,
       path: "/",
     });
@@ -565,7 +565,8 @@ export const deleteStudent = async (req, res) => {
 
     await pool.query("COMMIT");
 
-    mailOptions({
+    await mailOptions({
+      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
       to: student.email,
       subject: "Account Deleted - Cordova Public College",
       text: `Hello,
@@ -703,7 +704,8 @@ export const restoreStudent = async (req, res) => {
 
     await client.query("COMMIT");
 
-    mailOptions({
+    await mailOptions({
+      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
       to: student.email,
       subject: "Your Registration OTP - Cordova Public College",
       text: `Hello,
