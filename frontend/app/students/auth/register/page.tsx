@@ -149,7 +149,7 @@ export default function SignUpPage() {
               <BookOpen className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
 
               <select
-                className="text-gray-400 w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="text-black w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
                 required

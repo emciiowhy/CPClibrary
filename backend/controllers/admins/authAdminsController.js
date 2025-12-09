@@ -119,7 +119,7 @@ export const registerAdminRequestController = async (req, res) => {
     );
 
     mailOptions({
-      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
+      from: isProduction ? "CPC Library <onboarding@resend.dev>" : process.env.EMAIL_USER,
       to: email,
       subject: "Your Registration OTP",
       text: `Your OTP is: ${otp}`, 
@@ -296,7 +296,7 @@ export const forgotPasswordAdminController = async (req, res) => {
 
    try {
     await mailOptions({
-      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
+      from: isProduction ? "CPC Library <onboarding@resend.dev>" : process.env.EMAIL_USER,
       to: email,
       subject: "Cordova Public College - Admin Password Reset OTP",
       text: `
@@ -566,7 +566,7 @@ export const deleteStudent = async (req, res) => {
     await pool.query("COMMIT");
 
     await mailOptions({
-      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
+      from: isProduction ? "CPC Library <onboarding@resend.dev>" : process.env.EMAIL_USER,
       to: student.email,
       subject: "Account Deleted - Cordova Public College",
       text: `Hello,
@@ -705,7 +705,7 @@ export const restoreStudent = async (req, res) => {
     await client.query("COMMIT");
 
     await mailOptions({
-      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
+      from: isProduction ? "CPC Library <onboarding@resend.dev>" : process.env.EMAIL_USER,
       to: student.email,
       subject: "Your Registration OTP - Cordova Public College",
       text: `Hello,

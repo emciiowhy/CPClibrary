@@ -130,7 +130,7 @@ export const registerStudentRequestController = async (req, res) => {
 
     try {
       await mailOptions({
-        from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
+        from: isProduction ? "CPC Library <onboarding@resend.dev>" : process.env.EMAIL_USER,
         to: email,
         subject: "Your Registration OTP",
         text: `Your OTP is: ${otp}`, 
@@ -341,7 +341,7 @@ export const forgotPasswordStudentsController = async (req, res) => {
     
 
     await mailOptions({
-      from: isProduction ? "" : "CPC Library <onboarding@resend.dev>",
+      from: isProduction ? "CPC Library <onboarding@resend.dev>" : process.env.EMAIL_USER,
       to: email,
       subject: "Cordova Public College - Password Reset OTP",
       text: `Hello,
