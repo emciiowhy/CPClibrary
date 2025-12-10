@@ -93,6 +93,7 @@ export default function StudentProfile() {
       toast.success(result.data.message);
       console.log(result.data.student);
       setConfirm(!confirm);
+      window.location.reload();
     } catch (error: any) {
       toast.error(error.response.message + "error");
       setSubmitted(false);

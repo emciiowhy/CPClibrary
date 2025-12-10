@@ -38,7 +38,11 @@ export default function MembersPage() {
       try {
         const response = await api.get('/api/students');
 
-        setStudents(response.data);
+        const sortedStudents = response.data.sort(
+          (a: StudentType, b:StudentType) => b.id - a.id
+        );
+
+        setStudents(sortedStudents);
         console.log(students);
       } catch (error) {
         toast.error("Error getting students");
@@ -209,7 +213,7 @@ export default function MembersPage() {
                           <img 
                             src={student.profile_url || StockProfile.src} 
                             alt="student profile" 
-                            className="w-20 rounded-full"
+                            className="w-10 h-10 rounded-full object-cover"
                           />
                         </div>
                       </td>
@@ -259,7 +263,7 @@ export default function MembersPage() {
                           <img 
                             src={student.profile_url || StockProfile.src} 
                             alt="student profile" 
-                            className="w-20 rounded-full"
+                            className="w-10 h-10 rounded-full object-cover"
                           />
                         </div>
                       </td>
