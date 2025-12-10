@@ -226,7 +226,7 @@ export default function SignUpPage() {
             <span className="text-gray-600 text-sm">Already have an account? </span>
             <button
               type="button"
-              onClick={() => router.push('/admin/auth/login')}
+              onClick={() => router.push('/students/auth/login')}
               className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
             >
               Login
