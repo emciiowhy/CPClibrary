@@ -169,7 +169,7 @@ const handleChangePassword = async (): Promise<boolean> => {
             {/* Clickable Image */}
             <img
               alt="Student Profile"
-              src={student.profile_url || process.env.STOCK_PROFILE}
+              src={student.profile_url || process.env.STOCK_PROFILE || StockProfile.src}
               className={`w-32 h-32 md:w-40 md:h-40 rounded-full border-4 object-cover
               ${
                 confirm ? "cursor-pointer border-indigo-800" : "border-gray-400"
