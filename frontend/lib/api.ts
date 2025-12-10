@@ -1,8 +1,12 @@
 import axios from 'axios';
 
+const prodBase = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, '');
+const localBase = 'http://localhost:8080';
+const baseURL = process.env.NODE_ENV === 'production' ? prodBase : localBase;
+
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BACKEND_URL : 'http://localhost:8080',
+  baseURL,
   withCredentials: true, // send cookies automatically
   headers: { 'Content-Type': 'application/json' },
 });
@@ -10,11 +14,7 @@ const api = axios.create({
 // Function to refresh access token
 const refreshAcessToken = async () => {
   try {
-    await axios.get(
-      `${process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BACKEND_URL : 'http://localhost:8080'}/api/refresh-token`,
-      { withCredentials: true } // cookie sent automatically
-    );
-    
+    await axios.get(`${baseURL}/api/refresh-token`, { withCredentials: true });
     return true;
   } catch (error) {
     console.error('Refresh token failed', error);

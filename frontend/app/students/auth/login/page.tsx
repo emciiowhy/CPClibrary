@@ -22,12 +22,13 @@ export default function LoginPage() {
     const verifyStudent = async () => {
       try {
         const result = await api.get('/api/check-token');
-        if (result.data.decoded.role === "student") {
+        const role = result.data?.decoded?.role;
+        if (role === "student") {
           toast.success(result.data.message);
           router.push('/students/dashboard');
         }
 
-        if (result.data.decoded.role === "admin") {
+        if (role === "admin") {
           toast.success(result.data.message);
           router.push('/admin/dashboard');
         }

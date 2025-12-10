@@ -197,7 +197,6 @@ export const registerStudentRequestController = async (req, res) => {
       success: true
     });
 
-
   } catch (error) {
     return res.status(500).json({
       message: "Failed to request register",
