@@ -20,7 +20,7 @@ interface ChangePasswordTypes {
   onChangeNew: (value: string) => void
   onChangeConfirm: (value: string) => void
   onSubmit: () => Promise<boolean>
-  submitted: boolean
+  submitChangePass: boolean
   onClose?: () => void
 }
 
@@ -32,7 +32,7 @@ export default function ChangePassword({
   onChangeNew,
   onChangeConfirm,
   onSubmit,
-  submitted,
+  submitChangePass,
   onClose
 }: ChangePasswordTypes) {
   return (
@@ -91,7 +91,7 @@ export default function ChangePassword({
           },
           className: "rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white w-full",
           type: "button",
-          submitted: {submitted},
+          submitted: submitChangePass,
           btnText: "Save Changes",
           btnLoadingText: "Saving Changes"
           }}

@@ -76,59 +76,71 @@ export default function StudentProfile() {
   }, []);
 
   const handleEditProfile = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("name", student.name);
-      formData.append("email", student.email);
-      formData.append("course", student.course);
-      formData.append("section", student.section);
-      if (profileImage) {
-        formData.append("profileImage", profileImage);
-      }
+  // Prevent saving if fields are empty
+  if (
+    !student.name.trim() ||
+    !student.email.trim() ||
+    !student.course.trim() ||
+    !student.section.trim()
+  ) {
+    toast.error("Please fill out all fields before saving.");
+    return;
+  }
 
-      const result = await api.post("/api/students/update-profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+  try {
+    const formData = new FormData();
+    formData.append("name", student.name);
+    formData.append("email", student.email);
+    formData.append("course", student.course);
+    formData.append("section", student.section);
 
-      toast.success(result.data.message);
-      console.log(result.data.student);
-      setConfirm(!confirm);
-      window.location.reload();
-    } catch (error: any) {
-      toast.error(error.response.message + "error");
-      setSubmitted(false);
-      console.log(error);
-      return;
+    if (profileImage) {
+      formData.append("profileImage", profileImage);
     }
+
+    const result = await api.post("/api/students/update-profile", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    toast.success(result.data.message);
+
+    setConfirm(false); // stop editing mode
+    window.location.reload();
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Error updating profile");
+    setSubmitted(false);
+    console.log(error);
+    return;
+  }
   };
 
-const handleChangePassword = async (): Promise<boolean> => {
-  setChangeSubmitted(true);
-  try {
-    if (newPassword !== confirmNewPassword) {
-      toast.error("Passwords do not match.");
+  const handleChangePassword = async (): Promise<boolean> => {
+    setChangeSubmitted(true);
+    try {
+      if (newPassword !== confirmNewPassword) {
+        toast.error("Passwords do not match.");
+        setChangeSubmitted(false);
+        return false;
+      }
+
+      const response = await api.post('/api/students/change-password', {
+        newPassword,
+        currentPassword
+      });
+
+      toast.success(response.data.message);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setChangeSubmitted(false);
+
+      return true;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Error in changing password");
       setChangeSubmitted(false);
       return false;
     }
-
-    const response = await api.post('/api/students/change-password', {
-      newPassword,
-      currentPassword
-    });
-
-    toast.success(response.data.message);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmNewPassword("");
-    setChangeSubmitted(false);
-
-    return true;
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || "Error in changing password");
-    setChangeSubmitted(false);
-    return false;
-  }
-};
+  };
 
 
   return (
@@ -169,7 +181,7 @@ const handleChangePassword = async (): Promise<boolean> => {
             {/* Clickable Image */}
             <img
               alt="Student Profile"
-              src={student.profile_url || process.env.STOCK_PROFILE || StockProfile.src}
+              src={student?.profile_url || process.env.STOCK_PROFILE || StockProfile.src}
               className={`w-32 h-32 md:w-40 md:h-40 rounded-full border-4 object-cover
               ${
                 confirm ? "cursor-pointer border-indigo-800" : "border-gray-400"
@@ -190,15 +202,15 @@ const handleChangePassword = async (): Promise<boolean> => {
           {/* Student Info */}
           <div className="flex-1 w-full flex flex-col gap-4">
             {[
-              { key: "name", label: "Name", value: student.name },
+              { key: "name", label: "Name", value: student?.name },
               {
                 key: "student_id",
                 label: "Student ID",
-                value: student.student_id,
+                value: student?.student_id,
               },
-              { key: "email", label: "Email", value: student.email },
-              { key: "course", label: "Course", value: student.course },
-              { key: "section", label: "Section", value: student.section },
+              { key: "email", label: "Email", value: student?.email },
+              { key: "course", label: "Course", value: student?.course },
+              { key: "section", label: "Section", value: student?.section },
             ].map((field) => (
               <div
                 key={field.label}
@@ -248,7 +260,7 @@ const handleChangePassword = async (): Promise<boolean> => {
                   onChangeNew={setNewPassword}
                   onChangeConfirm={setConfirmNewPassword}
                   onSubmit={handleChangePassword}
-                  submitted={changeSubmitted}
+                  submitChangePass={changeSubmitted}
                   onClose={() => setOpenChangePass(false)} // now this works
                 />
               </Dialog>
