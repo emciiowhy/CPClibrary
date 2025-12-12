@@ -569,7 +569,6 @@ export const updateProfile = async (req, res) => {
       ? { url: req.file.path, public_id: req.file.filename }
       : { url: DEFAULT_PROFILE_CONFIG.url, public_id: DEFAULT_PROFILE_CONFIG.public_id };
 
-
     const query = `
       UPDATE students
       SET name = $1, 

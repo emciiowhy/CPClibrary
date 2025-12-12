@@ -47,18 +47,10 @@ export default function EditBookModal({
   submitProcess,
   onClose,
 }: EditBookTypes) {
-  // Determine the preview image URL
-  const previewUrl =
-    bookImage instanceof File
-      ? URL.createObjectURL(bookImage)
-      : typeof bookImage === "string"
-      ? bookImage
-      : null;
-
   return (
-    <DialogContent className="max-w-sm rounded-xl p-5">
-      <DialogHeader>
-        <DialogTitle className="text-xl font-semibold text-black">
+    <DialogContent className="max-w-4xl w-full rounded-xl p-6">
+      <DialogHeader className="mb-4">
+        <DialogTitle className="text-2xl font-semibold text-black">
           Edit Book
         </DialogTitle>
         <DialogDescription className="text-gray-700">
@@ -66,89 +58,92 @@ export default function EditBookModal({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="space-y-3 mt-3">
-        {/* Book Image Upload */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="picture">Book Photo</Label>
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Left Column - Book Image */}
+        <div className="flex flex-col items-center w-full md:w-1/3">
+          <Label htmlFor="picture" className="mb-2">Book Photo</Label>
           <Input
             id="picture"
             type="file"
             accept="image/*"
             onChange={(e) =>
-              onChangeBookImage(
-                (e.target as HTMLInputElement).files?.[0] || null
-              )
+              onChangeBookImage((e.target as HTMLInputElement).files?.[0] || null)
             }
+            className="mb-4"
           />
-          {previewUrl && (
+          {bookImage && (
             <img
-              src={previewUrl}
+              src={
+                typeof bookImage === "string"
+                  ? bookImage
+                  : URL.createObjectURL(bookImage)
+              }
               alt="Preview"
-              className="w-32 h-32 object-cover rounded mt-2"
+              className="w-48 h-48 object-cover rounded"
             />
           )}
         </div>
 
-        {/* Description */}
-        <div className="flex flex-col space-y-1">
-          <Label className="text-black">Description</Label>
-          <Input
-            type="text"
-            value={description}
-            onChange={(e) => onChangeDescription(e.target.value)}
-            className="w-full border-gray-400 focus:ring-1 focus:ring-black"
-          />
-        </div>
+        {/* Right Column - Form Fields */}
+        <div className="flex flex-col w-full md:w-2/3 gap-4">
+          <div className="flex flex-col">
+            <Label className="text-black">Description</Label>
+            <Input
+              type="text"
+              value={description}
+              onChange={(e) => onChangeDescription(e.target.value)}
+              className="w-full border-gray-400 focus:ring-1 focus:ring-black"
+            />
+          </div>
 
-        {/* Author */}
-        <div className="flex flex-col space-y-1">
-          <Label className="text-black">Author</Label>
-          <Input
-            type="text"
-            value={author}
-            onChange={(e) => onChangeAuthor(e.target.value)}
-            className="w-full border-gray-400 focus:ring-1 focus:ring-black"
-          />
-        </div>
+          <div className="flex flex-col">
+            <Label className="text-black">Author</Label>
+            <Input
+              type="text"
+              value={author}
+              onChange={(e) => onChangeAuthor(e.target.value)}
+              className="w-full border-gray-400 focus:ring-1 focus:ring-black"
+            />
+          </div>
 
-        {/* Category */}
-        <div className="flex flex-col space-y-1">
-          <Label className="text-black">Category</Label>
-          <Input
-            type="text"
-            value={category}
-            onChange={(e) => onChangeCategory(e.target.value)}
-            placeholder="BSIT, BSED, etc."
-            className="w-full border-gray-400 focus:ring-1 focus:ring-black"
-          />
-        </div>
+          <div className="flex flex-col">
+            <Label className="text-black">Category</Label>
+            <Input
+              type="text"
+              value={category}
+              onChange={(e) => onChangeCategory(e.target.value)}
+              placeholder="BSIT, BSED, etc."
+              className="w-full border-gray-400 focus:ring-1 focus:ring-black"
+            />
+          </div>
 
-        {/* Release Year */}
-        <div className="flex flex-col space-y-1">
-          <Label className="text-black">Release Year</Label>
-          <Input
-            type="number"
-            value={year}
-            onChange={(e) => onChangeYear(e.target.value)}
-            className="w-full border-gray-400 focus:ring-1 focus:ring-black"
-          />
-        </div>
+          <div className="flex flex-row gap-4">
+            <div className="flex flex-col w-1/2">
+              <Label className="text-black">Release Year</Label>
+              <Input
+                type="number"
+                value={year}
+                onChange={(e) => onChangeYear(e.target.value)}
+                className="w-full border-gray-400 focus:ring-1 focus:ring-black"
+              />
+            </div>
 
-        {/* Copies */}
-        <div className="flex flex-col space-y-1">
-          <Label className="text-black">Copies</Label>
-          <Input
-            type="number"
-            value={copies}
-            onChange={(e) => onChangeCopies(Number(e.target.value))}
-            className="w-full border-gray-400 focus:ring-1 focus:ring-black"
-          />
+            <div className="flex flex-col w-1/2">
+              <Label className="text-black">Copies</Label>
+              <Input
+                type="number"
+                value={copies}
+                onChange={(e) => onChangeCopies(Number(e.target.value))}
+                className="w-full border-gray-400 focus:ring-1 focus:ring-black"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <DialogFooter className="mt-4 flex flex-col gap-2">
+      <DialogFooter className="mt-6 flex flex-col md:flex-row gap-4 justify-end">
         <DialogClose asChild>
-          <Button variant="outline" className="text-black border-gray-500">
+          <Button variant="outline" className="text-black border-gray-500 w-full md:w-auto">
             Close
           </Button>
         </DialogClose>
@@ -159,7 +154,7 @@ export default function EditBookModal({
               const success = await onSubmit();
               if (success) onClose?.();
             },
-            className: "rounded-lg bg-black hover:bg-gray-900 text-white w-full",
+            className: "rounded-lg bg-black hover:bg-gray-900 text-white w-full md:w-auto",
             type: "button",
             submitted: submitProcess,
             btnText: "Save Changes",

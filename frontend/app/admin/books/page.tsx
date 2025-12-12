@@ -56,6 +56,41 @@ const Books = () => {
     getBooks();
   }, []);
 
+  const handleEditBooks = async (): Promise<boolean> => {
+    if (!selectedBook) {
+      toast.error("No selected books found");
+      return false;
+    }
+
+    try {
+      const formData = new FormData();
+
+      formData.append("title", selectedBook.title);
+      formData.append("description", selectedBook.description);
+      formData.append("author", selectedBook.author);
+      formData.append("course", selectedBook.course);
+      formData.append("year", selectedBook.year);
+      formData.append("copies", selectedBook.copies.toString());
+      formData.append("bookId", selectedBook.id.toString());
+
+      if (selectedBook.new_cover_image instanceof File) {
+        formData.append("image", selectedBook.new_cover_image);
+      }
+
+      const result = await api.post('/api/books/update-book', formData, {
+        headers: {"Content-Type": "multipart/form-data"},
+      });
+
+      toast.success(result.data.message);
+      window.location.reload();
+      return true;
+    } catch (error: any) {
+      console.log(error);
+      toast.error("Updating book failed");
+      return false;
+    }
+  }
+
   const [bookLimitMap, setBookLimitMap] = useState(5);
   const filteredBook = books.filter((book) => {
     const matchesSearch =
@@ -232,22 +267,7 @@ const Books = () => {
                     onChangeCopies={(val) =>
                       setSelectedBook({ ...selectedBook, copies: val })
                     }
-                    onSubmit={async () => {
-                      // call your API to update the book
-                      try {
-                        await api.put(
-                          `/api/books/${selectedBook.id}`,
-                          selectedBook
-                        );
-                        toast.success("Book updated successfully");
-                        setOpenEditModal(false);
-                        return true;
-                      } catch (error) {
-                        toast.error("Error updating book");
-                        console.log(error);
-                        return false;
-                      }
-                    }}
+                    onSubmit={handleEditBooks}
                     submitProcess={false}
                     onClose={() => setOpenEditModal(false)}
                   />

@@ -300,3 +300,57 @@ export const scanBorrowQr = async (req, res) => {
     })
   }
 }
+
+export const updateBook = async (req, res) => {
+  const {title, description, author, course, year, copies, bookId} = req.body;
+  try {
+    console.log("Body:", req.body);
+    console.log("File:", req.file);
+
+    const udatedTextQuery = `
+      UPDATE books 
+      SET title = $1,
+          description = $2,
+          author = $3,
+          course = $4,
+          year = $5,
+          copies = $6
+      WHERE id = $7
+      RETURNING *;
+    `
+
+    const textValues = [title, description, author, course, year, parseInt(copies, 10), parseInt(bookId, 10)];
+    let updatedBook = (await pool.query(udatedTextQuery, textValues)).rows[0];
+
+    if (req.file) {
+      const updatedImageQuery = `
+        UPDATE books
+        SET cover_image_url = $1,
+            image_public_id = $2
+        WHERE id = $3
+        RETURNING *;
+      `;
+
+      const imageValues = [
+      req.file.path,
+      req.file.filename || req.file.originalname,
+      parseInt(book, 10),
+    ];
+
+    updatedBook = (await pool.query(updatedImageQuery, imageValues)).rows[0];
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Book updated successfully",
+      book: updateBook,
+    })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error in updating book",
+      success: false,
+    })
+  }
+}
