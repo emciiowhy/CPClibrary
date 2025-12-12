@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { Home, Book, LogOut, Menu, Search, UserCircle } from "lucide-react";
+import { Home, Book, LogOut, Menu, Search, UserCircle, LibraryBig } from "lucide-react";
 import { useState } from "react";
 import Cpc from '@/../public/cpc-logo.png';
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ export default function Header() {
     { path: "/students/dashboard", icon: Home, label: "Dashboard" },
     { path: "/students/browse-books", icon: Search, label: "Browse Books" },
     { path: "/students/borrowed-books", icon: Book, label: "Borrowed Books" },
+    { path: "/students/about-library", icon: LibraryBig, label: "About the Library" },
   ];
 
   const handleLogout = async () => {
@@ -53,7 +54,7 @@ export default function Header() {
           </button>
 
           {open && (
-            <div className="absolute right-6 top-20 bg-white text-black rounded shadow p-3 w-40 flex flex-col space-y-2">
+            <div className="absolute z-50 right-6 top-20 bg-white text-black rounded shadow p-3 w-40 flex flex-col space-y-2">
               {menuItems.map((item) => (
                 <button
                   className={`flex items-center gap-2 text-xs p-2 rounded transition-colors ${

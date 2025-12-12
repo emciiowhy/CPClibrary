@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Book, Bell ,PanelRightClose, BookOpen, AlertCircle, CheckCircle, CreditCard} from "lucide-react";
+import { BookX ,PanelRightClose, BookOpen, AlertCircle, CheckCircle, CreditCard} from "lucide-react";
 import Sidebar from "@/components/layout/students/SidebarStudent";
 import Header from "@/components/layout/students/HeaderStudent";
 import api from "@/lib/api";
@@ -90,6 +90,12 @@ export default function DashboardPage() {
       bookClassName: "text-green-700",
     },
     {
+      title: "Missing",
+      text: borrowedBooks.filter(b => b.status === "missing").length,
+      icon: <BookX />,
+      bookClassName: "text-orange-700",
+    },
+    {
       title: "Fines",
       text: `₱ ${student?.penalty ?? 0}`,
       icon: <CreditCard />,
@@ -116,7 +122,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           {stats.map((stat, index) => (
             <div key={index}>
               <StatsCardModal
@@ -156,6 +162,8 @@ export default function DashboardPage() {
                       ? "text-green-700"
                       : record.status === "overdue"
                       ? "text-red-700"
+                      : record.status === "missing"
+                      ? "text-orange-700"
                       : "text-gray-700"
                   }`}>
                     {record.status}
