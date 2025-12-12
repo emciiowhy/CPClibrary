@@ -38,7 +38,7 @@ export default function StudentProfile() {
 
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-indigo-900">Student Profile</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-indigo-900">About the Library</h1>
           {!openSideBar && (
             <PanelRightClose
               className="w-6 h-6 text-indigo-700 cursor-pointer hidden md:block"
@@ -50,7 +50,7 @@ export default function StudentProfile() {
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
           {/* About the Library */}
           <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-2 text-indigo-900">About the Library</h2>
+            {/* <h2 className="text-xl font-semibold mb-2 text-indigo-900">About the Library</h2> */}
             <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">
               The Cordova Public College Library provides students and faculty with curated learning
               materials, digital resources, and quiet spaces that support academic success and
@@ -61,12 +61,12 @@ export default function StudentProfile() {
               <div className="p-4 rounded-xl border border-gray-200 bg-white">
                 <h3 className="text-sm font-medium text-gray-700">Location</h3>
                 <p className="text-sm mt-1 text-gray-600">
-                  Cordova Public College - Main Campus
+                  Cordova Public College - Gabi, Cordova, Cebu
                 </p>
               </div>
               <div className="p-4 rounded-xl border border-gray-200 bg-white">
                 <h3 className="text-sm font-medium text-gray-700">Opening Hours</h3>
-                <p className="text-sm mt-1 text-gray-600">Mon - Fri: 8:00 AM - 6:00 PM</p>
+                <p className="text-sm mt-1 text-gray-600">Mon - Fri: 8:00 AM - 5:00 PM</p>
                 <p className="text-sm text-gray-600">Sat: 8:00 AM - 12:00 NN • Sun: Closed</p>
               </div>
             </div>
@@ -99,10 +99,10 @@ export default function StudentProfile() {
                   LR
                 </div>
                 <div>
-                  <p className="font-medium text-gray-800">Ms. Beverly Cañete</p>
+                  <p className="font-medium text-gray-800">Ms. Rachel P. Delos Reyes</p>
                   <p className="text-sm text-gray-600">Head Librarian</p>
-                  <p className="text-sm mt-1 text-gray-600">Email: beverly.canete@cordova.edu.ph</p>
-                  <p className="text-sm text-gray-600">Ext: 123 • Office: Library 2nd Floor</p>
+                  <p className="text-sm mt-1 text-gray-600">Email: rachel.delosreyes@cordova.edu.ph</p>
+                  <p className="text-sm text-gray-600">Ext: 123 • Office: Library Ground Floor</p>
                 </div>
               </div>
             </div>
@@ -110,10 +110,10 @@ export default function StudentProfile() {
             <aside className="p-4 rounded-xl border border-gray-200 bg-white">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Services</h3>
               <ul className="text-sm text-gray-600 space-y-1">
+                <li>Book lending and returns</li>
+                <li>Search book and borrow through online</li>
                 <li>Reference assistance</li>
-                <li>Interlibrary loan</li>
-                <li>Study room reservations</li>
-                <li>Computer & printing services</li>
+                <li>Reading and research areas</li>
               </ul>
             </aside>
           </section>
