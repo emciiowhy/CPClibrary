@@ -13,5 +13,6 @@ router.post('/books/add', uploadBook.single("image"), addBook);
 router.post('/books/borrow', borrowBook);
 router.post('/books/scan-borrow-qr', scanBorrowQr);
 router.post('/books/update-book', jwtAuthenticate, uploadBook.single("image"), updateBook);
+// router.post('/books/delete-book', jwtAuthenticate, deleteBook);
 
 export default router;

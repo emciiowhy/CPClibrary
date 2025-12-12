@@ -29,7 +29,7 @@ interface BorrowedHistory {
   penalty?: number;
   qr_code: string;
   totalPenalty?: number;
-
+  student_penalty?: number;
 }
 
 export default function BorrowBookPage() {
@@ -39,6 +39,7 @@ export default function BorrowBookPage() {
   const [borrowedSubmitted, setBorrowedSubmitted] = useState(false);
   const [returnedSubmitted, setReturnedSubmitted] = useState(false);
   const [overdueSubmitted, setOverdueSubmitted] = useState(false);
+  const [missingSubmitted, setMissingSubmitted] = useState(false);
   const [extendDueDateValue, setExtendDueDateValue] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -64,55 +65,48 @@ export default function BorrowBookPage() {
 
           // determine status
           let status = record.status;
-          if (status !== "returned" && overdueDays > 0) {
+          if (status !== "returned" && status !== "missing" && overdueDays > 0) {
             status = "overdue";
           }
 
-          // calculate penalty ONLY IF OVERDUE & NOT RETURNED
-          let penalty = 0;
+          // calculate overdue penalty ONLY IF OVERDUE & NOT RETURNED & NOT MISSING
+          let overduePenalty = 0;
           if (status === "overdue") {
-            penalty = overdueDays * 30;
+            overduePenalty = overdueDays * 30;
           }
 
-          return { ...record, penalty, status };
+          return { ...record, penalty: overduePenalty, status };
         });
 
-        // total penalty per student
-        const penaltyPerStudent: Record<string, number> = {};
+        // Calculate total penalty per student
+        // This includes: student's existing penalty (from DB, includes 150 for missing) + overdue penalties
+        const penaltyPerStudent: Record<string, { basePenalty: number; overduePenalty: number }> = {};
         updatedData.forEach((record) => {
           if (!penaltyPerStudent[record.student_school_id]) {
-            penaltyPerStudent[record.student_school_id] = 0;
+            // Get the base penalty from the database (includes 150 for missing status)
+            penaltyPerStudent[record.student_school_id] = {
+              basePenalty: record.student_penalty || 0,
+              overduePenalty: 0
+            };
           }
 
-          // Only add penalty if the book is overdue
+          // Add overdue penalty if the book is overdue
           if (record.status === "overdue") {
-            penaltyPerStudent[record.student_school_id] += record.penalty;
+            penaltyPerStudent[record.student_school_id].overduePenalty += record.penalty || 0;
           }
         });
 
-        const finalData = updatedData.map((record) => ({
-          ...record,
-          totalPenalty: penaltyPerStudent[record.student_school_id] || 0,
-        }));
+        const finalData = updatedData.map((record) => {
+          const studentPenalties = penaltyPerStudent[record.student_school_id];
+          const totalPenalty = (studentPenalties?.basePenalty || 0) + (studentPenalties?.overduePenalty || 0);
+          
+          return {
+            ...record,
+            totalPenalty: totalPenalty,
+          };
+        });
 
         setBorrowedHistory(finalData);
-
-        // send to backend
-        for (const studentId in penaltyPerStudent) {
-          const studentPenalty = penaltyPerStudent[studentId];
-
-          await api
-            .post("/api/admins/add-penalty", {
-              studentId,
-              penalty: studentPenalty,
-            })
-            .catch((err) => {
-              console.log(
-                `Error sending penalty for student ${studentId}:`,
-                err
-              );
-            });
-        }
       } catch (error) {
         toast.error("Error in getting all borrowed history");
         console.log(error);
@@ -129,6 +123,7 @@ export default function BorrowBookPage() {
     if (borrowedStatus === "borrowed") setBorrowedSubmitted(true);
     if (borrowedStatus === "returned") setReturnedSubmitted(true);
     if (borrowedStatus === "overdue") setOverdueSubmitted(true);
+    if (borrowedStatus === "missing") setMissingSubmitted(true);
 
     try {
       const result = await api.post("/api/admins/set-student-borrowed-status", {
@@ -142,6 +137,7 @@ export default function BorrowBookPage() {
       if (borrowedStatus === "borrowed") setBorrowedSubmitted(false);
       if (borrowedStatus === "returned") setReturnedSubmitted(false);
       if (borrowedStatus === "overdue") setOverdueSubmitted(false);
+      if (borrowedStatus === "missing") setMissingSubmitted(false);
 
       toast.error("Error in setting book status");
       console.log(error);
@@ -240,6 +236,7 @@ export default function BorrowBookPage() {
                 <option value="borrowed">Borrowed</option>
                 <option value="returned">Returned</option>
                 <option value="overdue">Overdue</option>
+                <option value="missing">Missing</option>
               </select>
             </div>
           </div>
@@ -305,6 +302,7 @@ export default function BorrowBookPage() {
                         borrowedSubmitted={borrowedSubmitted}
                         returnedSubmitted={returnedSubmitted}
                         overdueSubmitted={overdueSubmitted}
+                        missingSubmitted={missingSubmitted}
                         BorrowedOnClick={() => {
                           if (book.status === "borrowed") {
                             toast.error(
@@ -331,6 +329,15 @@ export default function BorrowBookPage() {
                             return;
                           }
                           setStudentBorrowedStatus(book.borrow_id, "overdue");
+                        }}
+                        MissingOnClick={() => {
+                          if (book.status === "missing") {
+                            toast.error(
+                              "This book is already marked as missing."
+                            );
+                            return
+                          }
+                          setStudentBorrowedStatus(book.borrow_id, "missing");
                         }}
                         dueDateValue={extendDueDateValue}
                         onDueDateChange={setExtendDueDateValue}

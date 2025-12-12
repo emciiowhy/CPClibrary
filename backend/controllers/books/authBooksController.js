@@ -201,9 +201,11 @@ export const getAllBorrowed = async (req, res) => {
         br.due_date,
         br.return_date,
         br.status,
+        br.qr_code,
         s.id AS student_db_id,
         s.student_id AS student_school_id,
         s.name AS student_name,
+        s.penalty AS student_penalty,
         b.id AS book_id,
         b.title AS book_title,
         b.author AS book_author
@@ -354,3 +356,25 @@ export const updateBook = async (req, res) => {
     })
   }
 }
+
+// export const deleteBook = async (req, res) => {
+//   const { bookId } = req.body;
+//   try {
+//     await pool.query(`
+//         DELETE FROM books
+//         WHERE id = $1;
+//       `, [bookId]);
+
+//     return res.status(200).json({
+//       message: "Book deleted successfully",
+//       success: true,
+//     })
+
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({
+//       message: "Error in deleting books",
+//       success: false
+//     })
+//   }
+// }

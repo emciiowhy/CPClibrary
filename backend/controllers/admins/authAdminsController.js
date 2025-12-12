@@ -809,6 +809,28 @@ export const setStudentBorrowedStatus = async (req, res) => {
 
     await pool.query(query, [borrowedStatus, borrowId]);
 
+    if (borrowedStatus === "missing") {
+      const user = await findStudentByBorrowId(borrowId);
+      if (!user) {
+        console.log("no user found");
+        return res.status(400).json({message: "Student using borrow Id not found"});
+      }
+      const userId = user.student_id;
+
+      await pool.query(`
+        UPDATE students
+        SET penalty = penalty + 150
+        WHERE id = $1;
+      `, [userId]);
+
+      return res.json({
+        message: borrowedStatus === "missing" ?
+          `Successfully updated status to ${borrowedStatus} and added fine.`
+            :
+          `Successfully updated status to ${borrowedStatus}`,
+      })
+    }
+
     //if returned na button
     if (borrowedStatus === "returned") {
       const user = await findStudentByBorrowId(borrowId);

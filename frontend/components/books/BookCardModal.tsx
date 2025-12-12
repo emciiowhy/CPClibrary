@@ -21,10 +21,9 @@ interface BookDialogProps {
   user: string;
   onClickBtn?: () => void;
   editBookOnClick?: () => void;
-  deleteBookOnClick?: () => void;
 }
 
-export default function BookDialog({ book_title, book_cover_url, author, year, description, copies, user, onClickBtn, editBookOnClick, deleteBookOnClick }: BookDialogProps) {
+export default function BookDialog({ book_title, book_cover_url, author, year, description, copies, user, onClickBtn, editBookOnClick }: BookDialogProps) {
   return (
     <DialogContent className="max-w-lg p-6 rounded-2xl">
       <DialogHeader>
@@ -52,7 +51,7 @@ export default function BookDialog({ book_title, book_cover_url, author, year, d
 
       <DialogFooter className="flex justify-end gap-3 mt-4">
 
-        {
+        {/* {
           user === "admin" &&
           <Button
             className="bg-red-700 hover:bg-red-800 text-white"
@@ -60,7 +59,7 @@ export default function BookDialog({ book_title, book_cover_url, author, year, d
           >
             Delete Book
           </Button>
-        }
+        } */}
 
         {
           user === "admin" &&

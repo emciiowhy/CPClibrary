@@ -17,10 +17,12 @@ interface BorrowMoreProps {
   borrowedSubmitted: boolean,
   returnedSubmitted: boolean,
   overdueSubmitted: boolean,
+  missingSubmitted: boolean,
 
   BorrowedOnClick: () => void,
   ReturnedOnClick: () => void,
   OverdueOnClick: () => void,
+  MissingOnClick:  () => void,
 
   dueDateValue: string,
   onDueDateChange: (value: string) => void,
@@ -30,7 +32,7 @@ interface BorrowMoreProps {
   isOverDue: boolean
 }
 
-export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitted ,borrowedSubmitted, returnedSubmitted, overdueSubmitted, BorrowedOnClick, ReturnedOnClick, OverdueOnClick, dueDateValue, onDueDateChange, ExtendOnClick, }: BorrowMoreProps) {
+export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitted ,borrowedSubmitted, returnedSubmitted, overdueSubmitted, missingSubmitted, BorrowedOnClick, ReturnedOnClick, OverdueOnClick, MissingOnClick, dueDateValue, onDueDateChange, ExtendOnClick, }: BorrowMoreProps) {
   return (
     <div>
       <DialogContent>
@@ -47,13 +49,13 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
             <h1 className="text-sm font-semibold">
               Set students borrow status
             </h1>
-            <div className="flex justify-between">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-4 w-full">
               <ButtonSubmit
                 props={{
                   submitted: borrowedSubmitted,
                   buttonType: "submit",
                   className:
-                    "bg-indigo-700 hover:bg-blue-800 text-white rounded-lg transition-transform hover:scale-[1.05]",
+                    "bg-indigo-700 hover:bg-blue-800 text-white rounded-lg transition-transform hover:scale-[1.05] w-full",
                   btnText: "Set To Borrowed",
                   btnLoadingText: "Setting To Borrowed",
                   btnOnClick: BorrowedOnClick
@@ -65,7 +67,7 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
                   submitted: returnedSubmitted,
                   buttonType: "submit",
                   className:
-                    "bg-green-700 hover:bg-green-800 text-white rounded-lg transition-transform hover:scale-[1.05]",
+                    "bg-green-700 hover:bg-green-800 text-white rounded-lg transition-transform hover:scale-[1.05] w-full",
                   btnText: "Set To Returned",
                   btnLoadingText: "Setting To Returned",
                   btnOnClick: ReturnedOnClick
@@ -77,10 +79,22 @@ export default function BorrowMoreModal({isOverDue, penaltyValue, extendSubmitte
                   submitted: overdueSubmitted,
                   buttonType: "submit",
                   className:
-                    "bg-red-700 hover:bg-red-800 text-white rounded-lg transition-transform hover:scale-[1.05]",
+                    "bg-red-700 hover:bg-red-800 text-white rounded-lg transition-transform hover:scale-[1.05] w-full",
                   btnText: "Set To Overdue",
                   btnLoadingText: "Setting To Overdue",
                   btnOnClick: OverdueOnClick
+                }}
+              />
+
+              <ButtonSubmit
+                props={{
+                  submitted: missingSubmitted,
+                  buttonType: "submit",
+                  className:
+                    "bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-transform hover:scale-[1.05] w-full",
+                  btnText: "Set To Missing",
+                  btnLoadingText: "Setting To Missing",
+                  btnOnClick: MissingOnClick
                 }}
               />
             </div>

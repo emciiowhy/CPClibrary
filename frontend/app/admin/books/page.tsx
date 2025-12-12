@@ -91,6 +91,21 @@ const Books = () => {
     }
   }
 
+  // const handleDeleteBooks = async () => {
+  //   try {
+  //     const result = await api.post('/api/books/delete-book', 
+  //       {bookId: selectedBook?.id},
+  //       {headers: { "Content-Type": "application/json" }}
+  //   );
+
+  //     toast.success(result.data.message);
+  //     window.location.reload();
+  //   } catch (error) {
+  //     toast.error("Error in deleting book");
+  //     console.log(error);
+  //   }
+  // }
+
   const [bookLimitMap, setBookLimitMap] = useState(5);
   const filteredBook = books.filter((book) => {
     const matchesSearch =
@@ -234,6 +249,7 @@ const Books = () => {
                           setOpenBookModal(false);
                           setOpenEditModal(true);
                         }}
+                        // deleteBookOnClick={handleDeleteBooks}
                       />
                     )}
                   </Dialog>
