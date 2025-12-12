@@ -13,31 +13,37 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import { ButtonSubmit } from "@/components/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import BookCardModal from "@/components/books/BookCardModal"
+import BookCardModal from "@/components/books/BookCardModal";
+import EditBookModal from "@/components/books/EditBookModal";
+import { select } from "framer-motion/client";
 
 interface BookType {
   id: number;
   title: string;
   description: string;
   cover_image_url: string;
+  new_cover_image?: File | null;
   author: string;
   course: string;
-  available: boolean,
-  year: string,
-  copies: number
+  available: boolean;
+  year: string;
+  copies: number;
 }
 
 const Books = () => {
   const [books, setBooks] = React.useState<BookType[]>([]);
   const [openSideBar, setOpenSideBar] = React.useState(true);
   const [submitted, setSubmitted] = useState(false);
-  const [searchBook, setSearchBook] = useState('');
-  const [bookCategory, setBookCategory] = useState('');
+  const [searchBook, setSearchBook] = useState("");
+  const [bookCategory, setBookCategory] = useState("");
+  const [openBookModal, setOpenBookModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<BookType | null>(null);
 
   useEffect(() => {
     const getBooks = async () => {
       try {
-        const response = await api.get('/api/books');
+        const response = await api.get("/api/books");
 
         setBooks(response.data);
       } catch (error) {
@@ -45,20 +51,21 @@ const Books = () => {
         console.log("Error getting books " + error);
         return;
       }
-    }
+    };
 
     getBooks();
   }, []);
 
   const [bookLimitMap, setBookLimitMap] = useState(5);
   const filteredBook = books.filter((book) => {
-    const matchesSearch = book.title.toLowerCase().includes(searchBook.toLowerCase()) ||
-                          book.author.toLowerCase().includes(searchBook.toLowerCase());
+    const matchesSearch =
+      book.title.toLowerCase().includes(searchBook.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchBook.toLowerCase());
 
     const matchesCategory = bookCategory === "" || book.course === bookCategory;
-    
+
     return matchesSearch && matchesCategory;
-  })
+  });
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -150,7 +157,18 @@ const Books = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
                 {filteredBook.slice(0, bookLimitMap).map((book) => (
-                  <Dialog key={book.id}>
+                  <Dialog
+                    key={book.id}
+                    open={openBookModal && selectedBook?.id === book.id}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setSelectedBook(book);
+                        setOpenBookModal(true);
+                      } else {
+                        setOpenBookModal(false);
+                      }
+                    }}
+                  >
                     <DialogTrigger>
                       <div>
                         <BookCard
@@ -168,18 +186,73 @@ const Books = () => {
                       </div>
                     </DialogTrigger>
 
-                    <BookCardModal 
-                      book_title={book.title}
-                      book_cover_url={book.cover_image_url}
-                      author={book.author} 
-                      year={book.year}
-                      description={book.description}
-                      copies={book.copies}
-                      user="admin"
-                    />
+                    {selectedBook && (
+                      <BookCardModal
+                        book_title={book.title}
+                        book_cover_url={book.cover_image_url}
+                        author={book.author}
+                        year={book.year}
+                        description={book.description}
+                        copies={book.copies}
+                        user="admin"
+                        editBookOnClick={() => {
+                          setOpenBookModal(false);
+                          setOpenEditModal(true);
+                        }}
+                      />
+                    )}
                   </Dialog>
                 ))}
               </div>
+
+              <Dialog open={openEditModal} onOpenChange={setOpenEditModal}>
+                {selectedBook && (
+                  <EditBookModal
+                    bookImage={selectedBook.cover_image_url ?? selectedBook.cover_image_url}
+                    description={selectedBook.description}
+                    author={selectedBook.author}
+                    category={selectedBook.course}
+                    year={selectedBook.year}
+                    copies={selectedBook.copies}
+                    onChangeBookImage={(val) =>
+                      setSelectedBook({ ...selectedBook, new_cover_image: val })
+                    }
+                    onChangeDescription={(val) =>
+                      setSelectedBook({ ...selectedBook, description: val })
+                    }
+                    onChangeAuthor={(val) =>
+                      setSelectedBook({ ...selectedBook, author: val })
+                    }
+                    onChangeCategory={(val) =>
+                      setSelectedBook({ ...selectedBook, course: val })
+                    }
+                    onChangeYear={(val) =>
+                      setSelectedBook({ ...selectedBook, year: val })
+                    }
+                    onChangeCopies={(val) =>
+                      setSelectedBook({ ...selectedBook, copies: val })
+                    }
+                    onSubmit={async () => {
+                      // call your API to update the book
+                      try {
+                        await api.put(
+                          `/api/books/${selectedBook.id}`,
+                          selectedBook
+                        );
+                        toast.success("Book updated successfully");
+                        setOpenEditModal(false);
+                        return true;
+                      } catch (error) {
+                        toast.error("Error updating book");
+                        console.log(error);
+                        return false;
+                      }
+                    }}
+                    submitProcess={false}
+                    onClose={() => setOpenEditModal(false)}
+                  />
+                )}
+              </Dialog>
             </div>
           </div>
         </div>
@@ -189,5 +262,3 @@ const Books = () => {
 };
 
 export default Books;
-
-
