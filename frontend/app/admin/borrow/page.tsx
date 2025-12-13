@@ -285,6 +285,8 @@ export default function BorrowBookPage() {
                         ? "text-green-700"
                         : book.status === "overdue"
                         ? "text-red-700"
+                        : book.status === "missing"
+                        ? "text-orange-700"
                         : "text-blue-700"
                     }`}
                   >
