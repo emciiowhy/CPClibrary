@@ -336,7 +336,7 @@ export const updateBook = async (req, res) => {
       const imageValues = [
       req.file.path,
       req.file.filename || req.file.originalname,
-      parseInt(book, 10),
+      parseInt(bookId, 10),
     ];
 
     updatedBook = (await pool.query(updatedImageQuery, imageValues)).rows[0];

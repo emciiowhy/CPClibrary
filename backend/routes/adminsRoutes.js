@@ -10,12 +10,12 @@ router.post('/admins/login', loginAdminController);
 router.post('/admins/register/request', registerAdminRequestController);
 router.post('/admins/register/verify-otp', verifyAdminOtpController);
 router.post('/admins/register/final-register', finalRegisterAdminController);
-router.post('/admins/forgot-password',forgotPasswordAdminController);
+router.post('/admins/forgot-password', forgotPasswordAdminController);
 router.post('/admins/reset-password', resetPasswordAdminController);
 router.post('/admins/change-status', jwtAuthenticate, changeStatus);
 router.post('/admins/delete-student', jwtAuthenticate, deleteStudent);
 router.post('/admins/restore-student',jwtAuthenticate, restoreStudent);
-router.post('/admins/set-student-borrowed-status', setStudentBorrowedStatus);
+router.post('/admins/set-student-borrowed-status', jwtAuthenticate, setStudentBorrowedStatus);
 router.post('/admins/extend-duedate',jwtAuthenticate, extendDueDate);
 router.post('/admins/add-penalty', jwtAuthenticate, addPenalty);
 

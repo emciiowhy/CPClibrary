@@ -27,7 +27,7 @@ export default function BookCard(props: BookCardProps) {
               className="w-20 h-28 object-cover rounded"
             />
           </div>
-          <div className="flex items-center text-sm font-medium">
+          <div className="flex items-center text-sm font-medium text-left">
             {props.bookTitle}
           </div>
           <div className="flex items-center text-sm text-gray-600">

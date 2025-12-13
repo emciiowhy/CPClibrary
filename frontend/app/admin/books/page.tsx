@@ -206,8 +206,8 @@ const Books = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
-                {filteredBook.slice(0, bookLimitMap).map((book) => (
-                  <Dialog
+                {filteredBook.map((book) => (
+                  <Dialog 
                     key={book.id}
                     open={openBookModal && selectedBook?.id === book.id}
                     onOpenChange={(open) => {
