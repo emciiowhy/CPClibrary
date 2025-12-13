@@ -36,6 +36,7 @@ const Books = () => {
   const [submitted, setSubmitted] = useState(false);
   const [searchBook, setSearchBook] = useState("");
   const [bookCategory, setBookCategory] = useState("");
+  const [statusCategory, setStatusCategory] = useState("");
   const [openBookModal, setOpenBookModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState<BookType | null>(null);
@@ -108,14 +109,23 @@ const Books = () => {
 
   const [bookLimitMap, setBookLimitMap] = useState(5);
   const filteredBook = books.filter((book) => {
-    const matchesSearch =
-      book.title.toLowerCase().includes(searchBook.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchBook.toLowerCase());
+  const matchesSearch =
+    book.title.toLowerCase().includes(searchBook.toLowerCase()) ||
+    book.author.toLowerCase().includes(searchBook.toLowerCase());
 
-    const matchesCategory = bookCategory === "" || book.course === bookCategory;
+  const matchesCategory =
+    bookCategory === "" || book.course === bookCategory;
 
-    return matchesSearch && matchesCategory;
-  });
+  const matchesStatus =
+    statusCategory === ""
+      ? true
+      : statusCategory === "available"
+      ? book.available === true
+      : book.available === false;
+
+  return matchesSearch && matchesCategory && matchesStatus;
+});
+
 
   return (
     <div className="flex-col md:flex-row flex h-screen overflow-hidden">
@@ -148,6 +158,33 @@ const Books = () => {
                 value={searchBook}
                 onChange={(e) => setSearchBook(e.target.value)}
               />
+            </div>
+
+            {/* Status Category Search */}
+            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+              <label
+                htmlFor="course_category"
+                className="text-sm font-medium text-gray-700 whitespace-nowrap"
+              >
+                Status
+              </label>
+              <select
+                name="status"
+                id="status"
+                className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm min-w-[140px] cursor-pointer hover:bg-gray-100"
+                value={statusCategory}
+                onChange={(e) => setStatusCategory(e.target.value)}
+              >
+                <option value="" className="text-gray-500">
+                  All Status
+                </option>
+                <option value="available" className="text-gray-900">
+                  Available
+                </option>
+                <option value="unavailable" className="text-gray-900">
+                  Unavailable
+                </option>
+              </select>
             </div>
 
             {/* Course Category Filter */}

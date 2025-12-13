@@ -16,9 +16,9 @@ export default function AddBookPage() {
 
   const [bookTitle, setBookTitle] = useState("");
   const [author, setAuthor] = useState("");
-  const [year, setYear] = useState(0);
+  const [year, setYear] = useState<number>(0);
   const [description, setDescription] = useState("");
-  const [copies, setCopies] = useState(0);
+  const [copies, setCopies] = useState<number>(0);
   const [image, setImage] = useState<File | null>(null);
   const [course, setCourse] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -141,6 +141,7 @@ export default function AddBookPage() {
                 type="number" 
                 value={copies}
                 onChange={(e) => setCopies(Number(e.target.value))}
+                min={0}
                 required />
             </div>
 
